@@ -71,7 +71,7 @@ done
 echo -e "${YELLOW}🚢 Deploying to production...${NC}"
 IMAGE="ghcr.io/mucrypt/portfolio-app:$COMMIT_SHA"
 
-kubectl set image deployment/portfolio-app placeholder="$IMAGE" -n portfolio-production
+kubectl set image deployment/portfolio-app -n portfolio-production portfolio="$IMAGE"
 echo -e "${GREEN}✅ Image updated in deployment${NC}"
 
 # Wait for rollout

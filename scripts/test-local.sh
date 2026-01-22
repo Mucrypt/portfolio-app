@@ -104,10 +104,12 @@ if npm run lint 2>&1 | tee /tmp/lint-output.txt; then
     print_success "ESLint passed with no errors"
 else
     # Check if it's warnings only
-    if grep -q "warning" /tmp/lint-output.txt && ! grep -q "error" /tmp/lint-output.txt; then
-        print_warning "ESLint passed with warnings (see above)"
+    if grep -q "error" /tmp/lint-output.txt; then
+        print_error "ESLint failed with ERRORS - deployment BLOCKED"
+        echo -e "${RED}Fix all ESLint errors before deploying${NC}"
+        FAILED=$((FAILED + 10))  # Add extra weight to lint errors
     else
-        print_error "ESLint failed with errors"
+        print_warning "ESLint passed with warnings (see above)"
     fi
 fi
 
@@ -116,7 +118,9 @@ print_test "4. TypeScript Type Checking"
 if npx tsc --noEmit 2>&1 | tee /tmp/tsc-output.txt; then
     print_success "TypeScript compilation check passed"
 else
-    print_error "TypeScript has type errors (see above)"
+    print_error "TypeScript has type errors - deployment BLOCKED"
+    echo -e "${RED}Fix all TypeScript errors before deploying${NC}"
+    FAILED=$((FAILED + 10))  # Add extra weight to type errors
 fi
 
 # ============================================
