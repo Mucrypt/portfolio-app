@@ -183,6 +183,9 @@ jobs:
         cache-to: type=gha,mode=max
         build-args: |
           NODE_ENV=production
+          NEXT_PUBLIC_SUPABASE_URL=${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          NEXT_PUBLIC_SITE_URL=${{ secrets.NEXT_PUBLIC_SITE_URL }}
 
     - name: Scan Docker image for vulnerabilities
       uses: aquasecurity/trivy-action@master
