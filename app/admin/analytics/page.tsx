@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 
 interface UserStats {
@@ -35,7 +35,7 @@ export default function AnalyticsPage() {
   const [recentActivity, setRecentActivity] = useState<UserActivity[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchAnalytics = async () => {
+  const fetchAnalytics = useCallback(async () => {
     try {
       const supabase = createClient();
 
@@ -90,11 +90,12 @@ export default function AnalyticsPage() {
       console.error("Error fetching analytics:", error);
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchAnalytics();
-  }, [fetchAnalytics]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   if (loading) {
     return (

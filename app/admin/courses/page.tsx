@@ -67,10 +67,6 @@ export default function AdminCoursesPage() {
     sort_order: "0",
   });
 
-  useEffect(() => {
-    loadCourses();
-  }, []);
-
   async function loadCourses() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
@@ -83,6 +79,11 @@ export default function AdminCoursesPage() {
 
     setCourses(data || []);
   }
+
+  useEffect(() => {
+    loadCourses();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   function generateSlug(title: string) {
     return title

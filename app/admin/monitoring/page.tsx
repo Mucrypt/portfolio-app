@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 
 interface SystemMetrics {
@@ -40,21 +40,7 @@ export default function MonitoringDashboard() {
   const [loading, setLoading] = useState(true);
   const [autoRefresh, setAutoRefresh] = useState(true);
 
-  useEffect(() => {
-    fetchMetrics();
-    fetchActivities();
-
-    if (autoRefresh) {
-      const interval = setInterval(() => {
-        fetchMetrics();
-        fetchActivities();
-      }, 30000); // Refresh every 30 seconds
-
-      return () => clearInterval(interval);
-    }
-  }, [autoRefresh]);
-
-  const fetchMetrics = async () => {
+  const fetchMetrics = useCallback(async () => {
     try {
       // Fetch health check
       const healthRes = await fetch("/api/health");
@@ -85,9 +71,9 @@ export default function MonitoringDashboard() {
     } catch (error) {
       console.error("Error fetching metrics:", error);
     }
-  };
+  }, []);
 
-  const fetchActivities = async () => {
+  const fetchActivities = useCallback(async () => {
     try {
       const supabase = createClient();
       
@@ -128,7 +114,22 @@ export default function MonitoringDashboard() {
       console.error("Error fetching activities:", error);
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchMetrics();
+    fetchActivities();
+
+    if (autoRefresh) {
+      const interval = setInterval(() => {
+        fetchMetrics();
+        fetchActivities();
+      }, 30000); // Refresh every 30 seconds
+
+      return () => clearInterval(interval);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoRefresh]);
 
   const clearCache = async () => {
     if (!confirm("Are you sure you want to clear all cache?")) return;

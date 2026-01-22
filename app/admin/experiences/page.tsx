@@ -26,6 +26,7 @@ export default function AdminExperiencesPage() {
 
   useEffect(() => {
     fetchExperiences();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function fetchExperiences() {

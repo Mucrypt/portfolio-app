@@ -47,6 +47,7 @@ export default function ErrorLogsPage() {
       },
     ];
     setErrors(mockErrors);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const filteredErrors = filter === "all" ? errors : errors.filter((e) => e.level === filter);

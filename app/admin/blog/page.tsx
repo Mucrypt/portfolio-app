@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { 
   Plus, Edit, Trash2, Eye, EyeOff, Calendar, Tag, Image as ImageIcon,
@@ -105,7 +105,7 @@ export default function AdminBlogPage() {
 
   const supabase = createClient();
 
-  const fetchPosts = async () => {
+  const fetchPosts = useCallback(async () => {
     setLoading(true);
     const { data, error } = await supabase
       .from("blog_posts")
@@ -119,21 +119,22 @@ export default function AdminBlogPage() {
       setPosts(data || []);
     }
     setLoading(false);
-  };
+  }, [supabase]);
 
-  const fetchCategories = async () => {
+  const fetchCategories = useCallback(async () => {
     const { data } = await supabase
       .from("blog_categories")
       .select("*")
       .order("name");
     
     setCategories(data || []);
-  };
+  }, [supabase]);
 
   useEffect(() => {
     fetchPosts();
     fetchCategories();
-  }, [fetchPosts, fetchCategories]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   function generateSlug(title: string): string {
     return title

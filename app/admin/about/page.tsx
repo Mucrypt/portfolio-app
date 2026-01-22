@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 
 type AboutPage = {
@@ -133,7 +133,7 @@ export default function AdminAboutPage() {
     is_visible: true,
   });
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
@@ -167,11 +167,12 @@ export default function AdminAboutPage() {
       const { data } = await supabase.from("about_quotes").select("*").eq("owner_user_id", user.id).order("sort_order");
       setQuotes(data || []);
     }
-  };
+  }, [activeTab, supabase]);
 
   useEffect(() => {
     loadData();
-  }, [activeTab, loadData]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loadData]);
 
   async function saveAboutPage() {
     setLoading(true);
