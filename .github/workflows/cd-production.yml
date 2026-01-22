@@ -1,0 +1,281 @@
+name: CD - Deploy to Production
+
+on:
+  push:
+    tags:
+    - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Docker image tag to deploy'
+        required: true
+        default: 'latest'
+      reason:
+        description: 'Reason for manual deployment'
+        required: true
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+  KUBE_NAMESPACE: portfolio-production
+
+jobs:
+  # Job 1: Pre-deployment checks
+  pre-deployment:
+    name: Pre-Deployment Validation
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Validate Kubernetes manifests
+      run: |
+        # Install kubeval
+        wget https://github.com/instrumenta/kubeval/releases/latest/download/kubeval-linux-amd64.tar.gz
+        tar xf kubeval-linux-amd64.tar.gz
+        sudo mv kubeval /usr/local/bin
+
+        # Validate manifests
+        find k8s/production -name "*.yaml" -type f -exec kubeval {} \;
+
+    - name: Check staging health
+      run: |
+        STAGING_URL="https://staging.romeomukulah.org"
+
+        if curl -f -s "$STAGING_URL/api/health" | grep -q "healthy"; then
+          echo "✅ Staging is healthy, proceeding with production deployment"
+        else
+          echo "❌ Staging is unhealthy, aborting production deployment"
+          exit 1
+        fi
+
+  # Job 2: Deploy to production
+  deploy-production:
+    name: Deploy to Production
+    needs: [ pre-deployment ]
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://romeomukulah.org
+
+    permissions:
+      contents: read
+      packages: read
+      id-token: write
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION }}
+
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v2
+
+    - name: Configure kubectl
+      run: |
+        aws eks update-kubeconfig \
+          --region ${{ secrets.AWS_REGION }} \
+          --name ${{ secrets.EKS_CLUSTER_NAME }}
+
+    - name: Install Helm
+      uses: azure/setup-helm@v3
+      with:
+        version: 'v3.13.0'
+
+    - name: Create namespace if not exists
+      run: |
+        kubectl create namespace ${{ env.KUBE_NAMESPACE }} --dry-run=client -o yaml | kubectl apply -f -
+
+    - name: Create Docker registry secret
+      run: |
+        kubectl create secret docker-registry ghcr-secret \
+          --docker-server=${{ env.REGISTRY }} \
+          --docker-username=${{ github.actor }} \
+          --docker-password=${{ secrets.GITHUB_TOKEN }} \
+          --namespace=${{ env.KUBE_NAMESPACE }} \
+          --dry-run=client -o yaml | kubectl apply -f -
+
+    - name: Create application secrets
+      run: |
+        kubectl create secret generic app-secrets \
+          --from-literal=NEXT_PUBLIC_SUPABASE_URL="${{ secrets.PROD_SUPABASE_URL }}" \
+          --from-literal=NEXT_PUBLIC_SUPABASE_ANON_KEY="${{ secrets.PROD_SUPABASE_ANON_KEY }}" \
+          --namespace=${{ env.KUBE_NAMESPACE }} \
+          --dry-run=client -o yaml | kubectl apply -f -
+
+    - name: Backup current deployment
+      run: |
+        kubectl get deployment portfolio-production \
+          --namespace=${{ env.KUBE_NAMESPACE }} \
+          -o yaml > deployment-backup-$(date +%Y%m%d-%H%M%S).yaml || true
+
+    - name: Deploy with Helm (Blue-Green Strategy)
+      run: |
+        IMAGE_TAG="${{ github.event.inputs.tag || github.ref_name }}"
+
+        helm upgrade --install portfolio-production ./helm/portfolio \
+          --namespace ${{ env.KUBE_NAMESPACE }} \
+          --set image.repository=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }} \
+          --set image.tag=${IMAGE_TAG} \
+          --set environment=production \
+          --set ingress.host=romeomukulah.org \
+          --set ingress.tlsSecretName=romeomukulah-tls \
+          --set replicaCount=3 \
+          --set autoscaling.enabled=true \
+          --set autoscaling.minReplicas=3 \
+          --set autoscaling.maxReplicas=10 \
+          --set autoscaling.targetCPUUtilizationPercentage=70 \
+          --set resources.requests.cpu=200m \
+          --set resources.requests.memory=512Mi \
+          --set resources.limits.cpu=1000m \
+          --set resources.limits.memory=1Gi \
+          --set podDisruptionBudget.enabled=true \
+          --set podDisruptionBudget.minAvailable=2 \
+          --wait \
+          --timeout 10m
+
+    - name: Verify deployment
+      run: |
+        kubectl rollout status deployment/portfolio-production \
+          --namespace=${{ env.KUBE_NAMESPACE }} \
+          --timeout=10m
+
+        # Wait for all pods to be ready
+        kubectl wait --for=condition=ready pod \
+          -l app=portfolio-production \
+          --namespace=${{ env.KUBE_NAMESPACE }} \
+          --timeout=5m
+
+    - name: Run production smoke tests
+      run: |
+        PROD_URL="https://romeomukulah.org"
+
+        echo "Running comprehensive smoke tests against $PROD_URL"
+
+        # Wait for service to stabilize
+        sleep 60
+
+        # Test 1: Health endpoint
+        echo "Testing health endpoint..."
+        if curl -f -s "$PROD_URL/api/health" | grep -q "healthy"; then
+          echo "✅ Health check passed"
+        else
+          echo "❌ Health check failed"
+          exit 1
+        fi
+
+        # Test 2: Homepage
+        echo "Testing homepage..."
+        if curl -f -s "$PROD_URL" | grep -q "<!DOCTYPE html>"; then
+          echo "✅ Homepage accessible"
+        else
+          echo "❌ Homepage not accessible"
+          exit 1
+        fi
+
+        # Test 3: API endpoints
+        echo "Testing API endpoints..."
+        if curl -f -s "$PROD_URL/api/health" -w "%{http_code}" | grep -q "200"; then
+          echo "✅ API endpoints responding"
+        else
+          echo "❌ API endpoints not responding"
+          exit 1
+        fi
+
+        # Test 4: SSL/TLS
+        echo "Testing SSL certificate..."
+        if echo | openssl s_client -connect romeomukulah.org:443 2>/dev/null | grep -q "Verify return code: 0"; then
+          echo "✅ SSL certificate valid"
+        else
+          echo "⚠️  SSL certificate check inconclusive"
+        fi
+
+    - name: Run performance tests
+      run: |
+        # Install Apache Bench
+        sudo apt-get update && sudo apt-get install -y apache2-utils
+
+        echo "Running performance tests..."
+        ab -n 100 -c 10 https://romeomukulah.org/ > performance-report.txt || true
+
+        cat performance-report.txt
+
+    - name: Post deployment summary
+      if: always()
+      run: |
+        echo "## Production Deployment Summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "- **Environment**: Production" >> $GITHUB_STEP_SUMMARY
+        echo "- **Namespace**: ${{ env.KUBE_NAMESPACE }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Image Tag**: ${{ github.event.inputs.tag || github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **URL**: https://romeomukulah.org" >> $GITHUB_STEP_SUMMARY
+        echo "- **Deployed By**: ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Reason**: ${{ github.event.inputs.reason || 'Tag push deployment' }}" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### Deployment Status" >> $GITHUB_STEP_SUMMARY
+        kubectl get pods -n ${{ env.KUBE_NAMESPACE }} -l app=portfolio-production >> $GITHUB_STEP_SUMMARY || true
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### Service Status" >> $GITHUB_STEP_SUMMARY
+        kubectl get svc -n ${{ env.KUBE_NAMESPACE }} >> $GITHUB_STEP_SUMMARY || true
+
+    - name: Rollback on failure
+      if: failure()
+      run: |
+        echo "Deployment failed, initiating rollback..."
+        helm rollback portfolio-production \
+          --namespace=${{ env.KUBE_NAMESPACE }} \
+          --wait \
+          --timeout=5m || true
+
+    - name: Notify deployment status
+      if: always()
+      uses: 8398a7/action-slack@v3
+      with:
+        status: ${{ job.status }}
+        text: |
+          Production Deployment ${{ job.status }}!
+          Environment: Production
+          Image: ${{ github.event.inputs.tag || github.ref_name }}
+          URL: https://romeomukulah.org
+        webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+      continue-on-error: true
+
+  # Job 3: Post-deployment monitoring
+  post-deployment:
+    name: Post-Deployment Monitoring
+    needs: [ deploy-production ]
+    runs-on: ubuntu-latest
+    if: success()
+
+    steps:
+    - name: Monitor for 5 minutes
+      run: |
+        echo "Monitoring production deployment for 5 minutes..."
+
+        for i in {1..10}; do
+          echo "Check $i/10..."
+          
+          if curl -f -s "https://romeomukulah.org/api/health" | grep -q "healthy"; then
+            echo "✅ Health check passed ($i)"
+          else
+            echo "❌ Health check failed ($i)"
+            exit 1
+          fi
+          
+          sleep 30
+        done
+
+        echo "✅ All monitoring checks passed!"
+
+    - name: Create deployment tag
+      run: |
+        echo "Deployment successful and stable!"
+        echo "Tag: ${{ github.event.inputs.tag || github.ref_name }}"

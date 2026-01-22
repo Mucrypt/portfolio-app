@@ -7,10 +7,13 @@
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.0-3178C6?style=for-the-badge&logo=typescript)
 ![Supabase](https://img.shields.io/badge/Supabase-Database-3ECF8E?style=for-the-badge&logo=supabase)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.0-38B2AC?style=for-the-badge&logo=tailwind-css)
+![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker)
+![Kubernetes](https://img.shields.io/badge/Kubernetes-Deployed-326CE5?style=for-the-badge&logo=kubernetes)
+![AWS](https://img.shields.io/badge/AWS-EKS-FF9900?style=for-the-badge&logo=amazon-aws)
 
-A modern, full-stack portfolio website with a powerful admin CMS, built with Next.js 16, React 19, TypeScript, and Supabase. Features include blog management, service offerings, e-commerce shop, project showcase, and real-time inquiry notifications.
+A modern, production-ready full-stack portfolio website with powerful admin CMS, CI/CD pipelines, and enterprise-grade deployment on AWS EKS. Built with Next.js 16, React 19, TypeScript, and Supabase.
 
-[Demo](#) • [Documentation](#features) • [Report Bug](#) • [Request Feature](#)
+[Live Demo](https://romeomukulah.org) • [Documentation](#-documentation) • [Deploy Guide](docs/CICD.md) • [Report Bug](#) • [Request Feature](#)
 
 </div>
 
@@ -374,14 +377,22 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 If you have any questions or need help:
 
-- Open an [Issue](https://github.com/yourusername/portfolio-app/issues)
-- Email: your.email@example.com
-- Discord: [Join our community](#)
+- Open an [Issue](https://github.com/Mucrypt/portfolio-app/issues)
+- Email: admin@romeomukulah.org
+- Website: [romeomukulah.org](https://romeomukulah.org)
 
 ---
 
 ## 🗺️ Roadmap
 
+- [x] Docker containerization (dev + production)
+- [x] Nginx reverse proxy with SSL
+- [x] GitHub Actions CI/CD pipelines
+- [x] Kubernetes manifests and Helm charts
+- [x] AWS EKS deployment configuration
+- [x] Security scanning (Snyk, Trivy, SonarCloud)
+- [ ] Prometheus + Grafana monitoring
+- [ ] ELK stack for log aggregation
 - [ ] Newsletter subscription system
 - [ ] Advanced analytics dashboard
 - [ ] Multi-language support (i18n)
@@ -389,9 +400,17 @@ If you have any questions or need help:
 - [ ] Comment system for blog
 - [ ] Social media integration
 - [ ] Advanced search functionality
-- [ ] Mobile app (React Native)
 - [ ] API documentation
 - [ ] Automated testing suite
+
+---
+
+## 📚 Documentation
+
+- **[DOCKER.md](docs/DOCKER.md)** - Complete Docker containerization guide
+- **[CICD.md](docs/CICD.md)** - CI/CD pipelines and Kubernetes deployment
+- **[GITHUB_SECRETS.md](docs/GITHUB_SECRETS.md)** - GitHub Actions secrets configuration
+- **[helm/portfolio/README.md](helm/portfolio/README.md)** - Helm chart documentation
 
 ---
 
@@ -399,6 +418,7 @@ If you have any questions or need help:
 
 **⭐ Star this repo if you found it helpful!**
 
-Made with ❤️ by [Romeo Mukula](https://github.com/yourusername)
+Made with ❤️ by [Romeo Mukula](https://romeomukulah.org)
+
 
 </div>

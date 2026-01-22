@@ -1,0 +1,146 @@
+name: CD - Deploy to Staging
+
+on:
+  push:
+    branches:
+    - develop
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Reason for manual deployment'
+        required: false
+        default: 'Manual deployment'
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+  KUBE_NAMESPACE: portfolio-staging
+
+jobs:
+  deploy-staging:
+    name: Deploy to Staging Environment
+    runs-on: ubuntu-latest
+    environment:
+      name: staging
+      url: https://staging.romeomukulah.org
+
+    permissions:
+      contents: read
+      packages: read
+      id-token: write
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION }}
+
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v2
+
+    - name: Configure kubectl
+      run: |
+        aws eks update-kubeconfig \
+          --region ${{ secrets.AWS_REGION }} \
+          --name ${{ secrets.EKS_CLUSTER_NAME }}
+
+    - name: Install Helm
+      uses: azure/setup-helm@v3
+      with:
+        version: 'v3.13.0'
+
+    - name: Create namespace if not exists
+      run: |
+        kubectl create namespace ${{ env.KUBE_NAMESPACE }} --dry-run=client -o yaml | kubectl apply -f -
+
+    - name: Create Docker registry secret
+      run: |
+        kubectl create secret docker-registry ghcr-secret \
+          --docker-server=${{ env.REGISTRY }} \
+          --docker-username=${{ github.actor }} \
+          --docker-password=${{ secrets.GITHUB_TOKEN }} \
+          --namespace=${{ env.KUBE_NAMESPACE }} \
+          --dry-run=client -o yaml | kubectl apply -f -
+
+    - name: Create application secrets
+      run: |
+        kubectl create secret generic app-secrets \
+          --from-literal=NEXT_PUBLIC_SUPABASE_URL="${{ secrets.STAGING_SUPABASE_URL }}" \
+          --from-literal=NEXT_PUBLIC_SUPABASE_ANON_KEY="${{ secrets.STAGING_SUPABASE_ANON_KEY }}" \
+          --namespace=${{ env.KUBE_NAMESPACE }} \
+          --dry-run=client -o yaml | kubectl apply -f -
+
+    - name: Deploy with Helm
+      run: |
+        helm upgrade --install portfolio-staging ./helm/portfolio \
+          --namespace ${{ env.KUBE_NAMESPACE }} \
+          --set image.repository=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }} \
+          --set image.tag=${{ github.sha }} \
+          --set environment=staging \
+          --set ingress.host=staging.romeomukulah.org \
+          --set replicaCount=2 \
+          --set resources.requests.cpu=100m \
+          --set resources.requests.memory=256Mi \
+          --set resources.limits.cpu=500m \
+          --set resources.limits.memory=512Mi \
+          --wait \
+          --timeout 5m
+
+    - name: Verify deployment
+      run: |
+        kubectl rollout status deployment/portfolio-staging \
+          --namespace=${{ env.KUBE_NAMESPACE }} \
+          --timeout=5m
+
+    - name: Run smoke tests
+      run: |
+        STAGING_URL="https://staging.romeomukulah.org"
+
+        echo "Running smoke tests against $STAGING_URL"
+
+        # Wait for service to be ready
+        sleep 30
+
+        # Test health endpoint
+        if curl -f -s "$STAGING_URL/api/health" | grep -q "healthy"; then
+          echo "✅ Health check passed"
+        else
+          echo "❌ Health check failed"
+          exit 1
+        fi
+
+        # Test homepage
+        if curl -f -s "$STAGING_URL" | grep -q "<!DOCTYPE html>"; then
+          echo "✅ Homepage accessible"
+        else
+          echo "❌ Homepage not accessible"
+          exit 1
+        fi
+
+    - name: Post deployment summary
+      if: always()
+      run: |
+        echo "## Staging Deployment Summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "- **Environment**: Staging" >> $GITHUB_STEP_SUMMARY
+        echo "- **Namespace**: ${{ env.KUBE_NAMESPACE }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Image Tag**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **URL**: https://staging.romeomukulah.org" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### Deployment Status" >> $GITHUB_STEP_SUMMARY
+        kubectl get pods -n ${{ env.KUBE_NAMESPACE }} >> $GITHUB_STEP_SUMMARY || true
+
+    - name: Notify deployment status
+      if: failure()
+      uses: 8398a7/action-slack@v3
+      with:
+        status: ${{ job.status }}
+        text: 'Staging deployment failed!'
+        webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+      continue-on-error: true
