@@ -1,6 +1,8 @@
 import Redis from 'ioredis';
 
-const REDIS_HOST = process.env.REDIS_HOST || 'redis.portfolio-production.svc.cluster.local';
+// Use localhost for development, K8s service for production
+const isDev = process.env.NODE_ENV !== 'production';
+const REDIS_HOST = process.env.REDIS_HOST || (isDev ? 'localhost' : 'redis.portfolio-production.svc.cluster.local');
 const REDIS_PORT = parseInt(process.env.REDIS_PORT || '6379', 10);
 const REDIS_ENABLED = process.env.REDIS_ENABLED !== 'false';
 
@@ -13,30 +15,50 @@ if (REDIS_ENABLED) {
       host: REDIS_HOST,
       port: REDIS_PORT,
       retryStrategy: (times) => {
+        // Only retry a few times in development
+        if (isDev && times > 2) {
+          console.log('⚠️  Redis not available locally - continuing without cache');
+          return null;
+        }
         const delay = Math.min(times * 50, 2000);
         return delay;
       },
-      maxRetriesPerRequest: 3,
+      maxRetriesPerRequest: isDev ? 2 : 3,
       enableReadyCheck: true,
       lazyConnect: true,
+      connectTimeout: isDev ? 2000 : 10000, // 2s for dev, 10s for prod
     });
 
     redis.on('connect', () => {
-      console.log('✅ Redis connected successfully');
+      console.log('✅ Redis connected successfully at', REDIS_HOST);
     });
 
     redis.on('error', (err) => {
-      console.error('❌ Redis connection error:', err.message);
+      if (isDev) {
+        // Suppress repeated errors in development
+        if (!redis?.status || redis.status === 'end') {
+          console.log('⚠️  Redis not available - app will work without caching');
+        }
+      } else {
+        console.error('❌ Redis connection error:', err.message);
+      }
     });
 
     redis.connect().catch((err) => {
-      console.error('❌ Failed to connect to Redis:', err.message);
+      if (isDev) {
+        console.log('⚠️  Redis not running locally - app will continue without caching');
+        console.log('💡 To use Redis locally: docker run -d -p 6379:6379 redis:7-alpine');
+      } else {
+        console.error('❌ Failed to connect to Redis:', err.message);
+      }
       redis = null;
     });
   } catch (error) {
     console.error('❌ Error initializing Redis:', error);
     redis = null;
   }
+} else {
+  console.log('ℹ️  Redis caching disabled');
 }
 
 export type CacheOptions = {

@@ -133,11 +133,7 @@ export default function AdminAboutPage() {
     is_visible: true,
   });
 
-  useEffect(() => {
-    loadData();
-  }, [activeTab]);
-
-  async function loadData() {
+  const loadData = async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
@@ -171,7 +167,11 @@ export default function AdminAboutPage() {
       const { data } = await supabase.from("about_quotes").select("*").eq("owner_user_id", user.id).order("sort_order");
       setQuotes(data || []);
     }
-  }
+  };
+
+  useEffect(() => {
+    loadData();
+  }, [activeTab, loadData]);
 
   async function saveAboutPage() {
     setLoading(true);

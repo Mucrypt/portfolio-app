@@ -35,10 +35,6 @@ export default function AnalyticsPage() {
   const [recentActivity, setRecentActivity] = useState<UserActivity[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchAnalytics();
-  }, []);
-
   const fetchAnalytics = async () => {
     try {
       const supabase = createClient();
@@ -95,6 +91,10 @@ export default function AnalyticsPage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchAnalytics();
+  }, [fetchAnalytics]);
 
   if (loading) {
     return (
@@ -159,16 +159,19 @@ export default function AnalyticsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {topPages.map((page, idx) => (
-                <tr key={idx} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 text-sm text-gray-900 font-medium">{page.page}</td>
-                  <td className="px-6 py-4 text-sm text-gray-900">{page.views.toLocaleString()}</td>
-                  <td className="px-6 py-4 text-sm text-gray-900">{page.avgTime}</td>
-                  <td className="px-6 py-4 text-sm">
-                    <span className="text-green-600">↑ {Math.floor(Math.random() * 20)}%</span>
-                  </td>
-                </tr>
-              ))}
+              {topPages.map((page, idx) => {
+                const growth = 5 + (idx * 2); // Stable growth calculation
+                return (
+                  <tr key={idx} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 text-sm text-gray-900 font-medium">{page.page}</td>
+                    <td className="px-6 py-4 text-sm text-gray-900">{page.views.toLocaleString()}</td>
+                    <td className="px-6 py-4 text-sm text-gray-900">{page.avgTime}</td>
+                    <td className="px-6 py-4 text-sm">
+                      <span className="text-green-600">↑ {growth}%</span>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
