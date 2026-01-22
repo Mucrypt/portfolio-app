@@ -1,94 +1,97 @@
 #!/bin/bash
-
-# Production Deployment Script
-# This script builds and deploys the production environment
-
 set -e
 
-echo "🚀 Deploying Portfolio to Production..."
-
 # Colors for output
+RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
-RED='\033[0;31m'
-BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# Check if .env.production exists
-if [ ! -f .env.production ]; then
-    echo -e "${RED}❌ Error: .env.production file not found${NC}"
-    echo -e "${YELLOW}Please create .env.production file with required environment variables${NC}"
+echo -e "${GREEN}🚀 Portfolio App Deployment Script${NC}"
+echo "=================================="
+
+# Check if commit message is provided
+if [ -z "$1" ]; then
+    echo -e "${RED}❌ Error: Commit message required${NC}"
+    echo "Usage: ./scripts/deploy.sh \"Your commit message\""
     exit 1
 fi
 
-# Check if Docker is running
-if ! docker info > /dev/null 2>&1; then
-    echo -e "${RED}❌ Error: Docker is not running${NC}"
-    echo -e "${YELLOW}Please start Docker and try again${NC}"
-    exit 1
-fi
+COMMIT_MESSAGE="$1"
+BRANCH=$(git rev-parse --abbrev-ref HEAD)
 
-# Confirmation prompt
-echo -e "${YELLOW}⚠️  This will deploy to PRODUCTION environment${NC}"
-read -p "Are you sure you want to continue? (y/N) " -n 1 -r
-echo
-if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-    echo -e "${RED}Deployment cancelled${NC}"
-    exit 1
-fi
+echo -e "${YELLOW}📝 Branch: $BRANCH${NC}"
+echo -e "${YELLOW}💬 Commit: $COMMIT_MESSAGE${NC}"
 
-# Pull latest changes (if in git repo)
-if [ -d .git ]; then
-    echo -e "${BLUE}📥 Pulling latest changes...${NC}"
-    git pull origin main || echo -e "${YELLOW}⚠️  Git pull failed or not needed${NC}"
-fi
-
-# Stop existing production containers
-echo -e "${YELLOW}🛑 Stopping existing containers...${NC}"
-docker-compose -f docker/docker-compose.prod.yml down
-
-# Remove old images (optional cleanup)
-read -p "Do you want to remove old Docker images? (y/N) " -n 1 -r
-echo
-if [[ $REPLY =~ ^[Yy]$ ]]; then
-    echo -e "${YELLOW}🧹 Cleaning up old images...${NC}"
-    docker image prune -f
-fi
-
-# Build production images
-echo -e "${GREEN}🔨 Building production images...${NC}"
-docker-compose -f docker/docker-compose.prod.yml build --no-cache
-
-# Start production containers
-echo -e "${GREEN}🚀 Starting production containers...${NC}"
-docker-compose -f docker/docker-compose.prod.yml up -d
-
-# Wait for services to be ready
-echo -e "${YELLOW}⏳ Waiting for services to be ready...${NC}"
-sleep 15
-
-# Health check
-echo -e "${BLUE}🏥 Running health checks...${NC}"
-if curl -f http://localhost/health > /dev/null 2>&1; then
-    echo -e "${GREEN}✅ Nginx is healthy${NC}"
+# Check for uncommitted changes
+if [[ -n $(git status -s) ]]; then
+    echo -e "${YELLOW}📦 Committing changes...${NC}"
+    git add .
+    git commit -m "$COMMIT_MESSAGE"
+    echo -e "${GREEN}✅ Changes committed${NC}"
 else
-    echo -e "${RED}⚠️  Nginx health check failed${NC}"
+    echo -e "${YELLOW}ℹ️  No changes to commit${NC}"
 fi
 
-# Check container status
-if docker ps | grep -q portfolio-app && docker ps | grep -q portfolio-nginx; then
-    echo ""
-    echo -e "${GREEN}🎉 Production deployment successful!${NC}"
-    echo -e "${GREEN}🌐 Application: http://yourdomain.com${NC}"
-    echo -e "${GREEN}🔐 SSL: https://yourdomain.com${NC}"
-    echo ""
-    echo -e "${YELLOW}📊 Container Status:${NC}"
-    docker-compose -f docker/docker-compose.prod.yml ps
-    echo ""
-    echo -e "${YELLOW}📝 To view logs: docker-compose -f docker/docker-compose.prod.yml logs -f${NC}"
-    echo -e "${YELLOW}🛑 To stop: docker-compose -f docker/docker-compose.prod.yml down${NC}"
-else
-    echo -e "${RED}❌ Error: Containers failed to start${NC}"
-    echo -e "${YELLOW}Run 'docker-compose -f docker/docker-compose.prod.yml logs' to see errors${NC}"
-    exit 1
-fi
+# Push to GitHub
+echo -e "${YELLOW}📤 Pushing to GitHub...${NC}"
+git push origin "$BRANCH"
+COMMIT_SHA=$(git rev-parse HEAD)
+echo -e "${GREEN}✅ Pushed commit: $COMMIT_SHA${NC}"
+
+# Wait for CI workflow to start
+echo -e "${YELLOW}⏳ Waiting for CI workflow to start...${NC}"
+sleep 10
+
+# Get the workflow run ID
+RUN_ID=$(gh run list --branch "$BRANCH" --limit 1 --json databaseId --jq '.[0].databaseId')
+echo -e "${YELLOW}🔄 Watching CI workflow (ID: $RUN_ID)...${NC}"
+
+# Watch the workflow
+while true; do
+    STATUS=$(gh run view "$RUN_ID" --json status,conclusion --jq '.status')
+    
+    if [ "$STATUS" == "completed" ]; then
+        CONCLUSION=$(gh run view "$RUN_ID" --json conclusion --jq -r '.conclusion')
+        if [ "$CONCLUSION" == "success" ]; then
+            echo -e "${GREEN}✅ CI workflow completed successfully${NC}"
+            break
+        else
+            echo -e "${RED}❌ CI workflow failed with conclusion: $CONCLUSION${NC}"
+            echo -e "${YELLOW}View logs: gh run view $RUN_ID --log${NC}"
+            exit 1
+        fi
+    fi
+    
+    echo -e "${YELLOW}⏳ CI still running... (status: $STATUS)${NC}"
+    sleep 15
+done
+
+# Deploy to Kubernetes
+echo -e "${YELLOW}🚢 Deploying to production...${NC}"
+IMAGE="ghcr.io/mucrypt/portfolio-app:$COMMIT_SHA"
+
+kubectl set image deployment/portfolio-app placeholder="$IMAGE" -n portfolio-production
+echo -e "${GREEN}✅ Image updated in deployment${NC}"
+
+# Wait for rollout
+echo -e "${YELLOW}⏳ Waiting for rollout to complete...${NC}"
+kubectl rollout status deployment/portfolio-app -n portfolio-production --timeout=5m
+
+# Get pod name
+POD_NAME=$(kubectl get pods -n portfolio-production --sort-by=.metadata.creationTimestamp -o jsonpath='{.items[-1].metadata.name}')
+
+echo -e "${GREEN}✅ Deployment successful!${NC}"
+echo ""
+echo "=================================="
+echo -e "${GREEN}🎉 Deployment Complete${NC}"
+echo "=================================="
+echo -e "📦 Image: $IMAGE"
+echo -e "🏷️  Commit: $COMMIT_SHA"
+echo -e "🔗 Website: https://romeomukulah.org"
+echo ""
+echo -e "${YELLOW}📊 View pod logs:${NC}"
+echo "   kubectl logs $POD_NAME -n portfolio-production -f"
+echo ""
+echo -e "${YELLOW}📈 Check status:${NC}"
+echo "   kubectl get pods -n portfolio-production"
