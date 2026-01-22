@@ -69,7 +69,9 @@ done
 
 # Deploy to Kubernetes
 echo -e "${YELLOW}🚢 Deploying to production...${NC}"
-IMAGE="ghcr.io/mucrypt/portfolio-app:$COMMIT_SHA"
+# Use first 40 chars of commit SHA to match what GitHub Actions creates
+COMMIT_SHA_SHORT=$(echo "$COMMIT_SHA" | cut -c1-40)
+IMAGE="ghcr.io/mucrypt/portfolio-app:$COMMIT_SHA_SHORT"
 
 kubectl set image deployment/portfolio-app -n portfolio-production portfolio="$IMAGE"
 echo -e "${GREEN}✅ Image updated in deployment${NC}"
