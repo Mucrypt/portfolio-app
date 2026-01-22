@@ -5,21 +5,21 @@ services:
   # Next.js Application (Development)
   web:
     build:
-      context: .
-      dockerfile: Dockerfile.dev
+      context: ..
+      dockerfile: docker/Dockerfile.dev
     container_name: portfolio-dev
     ports:
       - "3000:3000"
     volumes:
       # Mount source code for hot reload
-      - .:/app
+      - ..:/app
       - /app/node_modules
       - /app/.next
     environment:
       - NODE_ENV=development
       - NEXT_TELEMETRY_DISABLED=1
     env_file:
-      - .env.local
+      - ../.env.local
     networks:
       - portfolio-network
     restart: unless-stopped

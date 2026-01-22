@@ -4,7 +4,7 @@ FROM node:20-alpine AS deps
 WORKDIR /app
 
 # Install dependencies only when needed
-COPY package.json package-lock.json ./
+COPY package.json package-lock.json* ./
 RUN npm ci --omit=dev && npm cache clean --force
 
 # Stage 2: Builder
@@ -12,15 +12,15 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 
 # Copy package files and install all dependencies (including dev) for build
-COPY package.json package-lock.json ./
+COPY package.json package-lock.json* ./
 RUN npm ci
 
 # Copy source code
 COPY . .
 
 # Build arguments for Supabase credentials
-ARG NEXT_PUBLIC_SUPABASE_URL
-ARG NEXT_PUBLIC_SUPABASE_ANON_KEY
+ARG NEXT_PUBLIC_SUPABASE_URL=https://example.supabase.co
+ARG NEXT_PUBLIC_SUPABASE_ANON_KEY=example_anon_key
 ARG NEXT_PUBLIC_SITE_URL=http://localhost:3000
 
 # Set environment variables for build

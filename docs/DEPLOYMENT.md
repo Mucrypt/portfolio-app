@@ -316,11 +316,11 @@ git push origin v1.0.0
 ### Check Docker
 ```bash
 # Local development
-docker-compose ps
-docker-compose logs -f
+docker-compose -f docker/docker-compose.yml ps
+docker-compose -f docker/docker-compose.yml logs -f
 
 # Local production
-docker-compose -f docker-compose.prod.yml ps
+docker-compose -f docker/docker-compose.prod.yml ps
 ```
 
 ### Check Kubernetes

@@ -321,7 +321,7 @@ gh run watch
 cd ~/portfolio-app
 
 # Build and push Docker image
-docker build -t <your-registry>/portfolio:latest -f docker/Dockerfile.production .
+docker build -t <your-registry>/portfolio:latest -f docker/Dockerfile .
 docker push <your-registry>/portfolio:latest
 
 # Deploy with Helm

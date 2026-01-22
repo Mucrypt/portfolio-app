@@ -45,7 +45,7 @@ fi
 
 # Stop existing production containers
 echo -e "${YELLOW}🛑 Stopping existing containers...${NC}"
-docker-compose -f docker-compose.prod.yml down
+docker-compose -f docker/docker-compose.prod.yml down
 
 # Remove old images (optional cleanup)
 read -p "Do you want to remove old Docker images? (y/N) " -n 1 -r
@@ -57,11 +57,11 @@ fi
 
 # Build production images
 echo -e "${GREEN}🔨 Building production images...${NC}"
-docker-compose -f docker-compose.prod.yml build --no-cache
+docker-compose -f docker/docker-compose.prod.yml build --no-cache
 
 # Start production containers
 echo -e "${GREEN}🚀 Starting production containers...${NC}"
-docker-compose -f docker-compose.prod.yml up -d
+docker-compose -f docker/docker-compose.prod.yml up -d
 
 # Wait for services to be ready
 echo -e "${YELLOW}⏳ Waiting for services to be ready...${NC}"
@@ -83,12 +83,12 @@ if docker ps | grep -q portfolio-app && docker ps | grep -q portfolio-nginx; the
     echo -e "${GREEN}🔐 SSL: https://yourdomain.com${NC}"
     echo ""
     echo -e "${YELLOW}📊 Container Status:${NC}"
-    docker-compose -f docker-compose.prod.yml ps
+    docker-compose -f docker/docker-compose.prod.yml ps
     echo ""
-    echo -e "${YELLOW}📝 To view logs: docker-compose -f docker-compose.prod.yml logs -f${NC}"
-    echo -e "${YELLOW}🛑 To stop: docker-compose -f docker-compose.prod.yml down${NC}"
+    echo -e "${YELLOW}📝 To view logs: docker-compose -f docker/docker-compose.prod.yml logs -f${NC}"
+    echo -e "${YELLOW}🛑 To stop: docker-compose -f docker/docker-compose.prod.yml down${NC}"
 else
     echo -e "${RED}❌ Error: Containers failed to start${NC}"
-    echo -e "${YELLOW}Run 'docker-compose -f docker-compose.prod.yml logs' to see errors${NC}"
+    echo -e "${YELLOW}Run 'docker-compose -f docker/docker-compose.prod.yml logs' to see errors${NC}"
     exit 1
 fi

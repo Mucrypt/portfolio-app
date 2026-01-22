@@ -205,11 +205,17 @@ test_docker_build() {
         print_warning "Docker is not installed, skipping Docker build test"
         return 0
     fi
+
+    if ! docker info >/dev/null 2>&1; then
+        print_error "Docker is installed but the daemon is not running"
+        print_warning "Start Docker and re-run: ./scripts/test-cicd-pipeline.sh docker"
+        return 1
+    fi
     
     cd "$PROJECT_ROOT"
     
     print_info "Building Docker image..."
-    if docker build -t portfolio-test:latest -f docker/Dockerfile.production .; then
+    if docker build -t portfolio-test:latest -f docker/Dockerfile .; then
         print_success "Docker build successful"
         
         # Clean up test image

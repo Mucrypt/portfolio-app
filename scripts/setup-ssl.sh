@@ -37,8 +37,8 @@ services:
     image: certbot/certbot
     container_name: certbot
     volumes:
-      - ./nginx/ssl:/etc/letsencrypt
-      - ./nginx/certbot:/var/www/certbot
+      - ../nginx/ssl:/etc/letsencrypt
+      - ../nginx/certbot:/var/www/certbot
     command: certonly --webroot --webroot-path=/var/www/certbot --email ${EMAIL} --agree-tos --no-eff-email -d ${DOMAIN} -d www.${DOMAIN}
 EOF
 
@@ -50,14 +50,14 @@ echo -e "${BLUE}🔧 Updating Nginx configuration...${NC}"
 
 # Start nginx temporarily for verification
 echo -e "${YELLOW}🚀 Starting Nginx for verification...${NC}"
-docker-compose -f docker-compose.prod.yml up -d nginx
+docker-compose -f docker/docker-compose.prod.yml up -d nginx
 
 # Wait for nginx
 sleep 5
 
 # Run certbot
 echo -e "${GREEN}🎫 Requesting SSL certificate...${NC}"
-docker-compose -f docker-compose.certbot.yml run --rm certbot
+docker-compose -f docker/docker-compose.certbot.yml run --rm certbot
 
 # Check if certificates were created
 if [ -f "nginx/ssl/live/${DOMAIN}/fullchain.pem" ]; then
@@ -70,7 +70,7 @@ if [ -f "nginx/ssl/live/${DOMAIN}/fullchain.pem" ]; then
     
     # Reload nginx
     echo -e "${BLUE}♻️  Reloading Nginx...${NC}"
-    docker-compose -f docker-compose.prod.yml restart nginx
+    docker-compose -f docker/docker-compose.prod.yml restart nginx
     
     echo ""
     echo -e "${GREEN}🎉 SSL setup complete!${NC}"
@@ -92,8 +92,15 @@ fi
 echo -e "${BLUE}⏰ Setting up auto-renewal...${NC}"
 cat > scripts/renew-ssl.sh << 'EOF'
 #!/bin/bash
-docker-compose -f docker-compose.certbot.yml run --rm certbot renew
-docker-compose -f docker-compose.prod.yml restart nginx
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+cd "$PROJECT_ROOT"
+
+docker-compose -f docker/docker-compose.certbot.yml run --rm certbot renew
+docker-compose -f docker/docker-compose.prod.yml restart nginx
 EOF
 
 chmod +x scripts/renew-ssl.sh

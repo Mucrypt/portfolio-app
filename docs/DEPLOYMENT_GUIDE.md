@@ -42,7 +42,7 @@
 cd ~/portfolio-app
 
 # Build production Docker image
-docker build -t portfolio-app:latest -f docker/Dockerfile.production .
+docker build -t portfolio-app:latest -f docker/Dockerfile .
 
 # Build development Docker image
 docker build -t portfolio-app:dev -f docker/Dockerfile.dev .
@@ -77,16 +77,16 @@ echo "⚠️  Please update .env.local with your actual credentials"
 
 ```bash
 # Start the application
-docker-compose -f docker/docker-compose.dev.yml up -d
+docker-compose -f docker/docker-compose.yml up -d
 
 # View logs
-docker-compose -f docker/docker-compose.dev.yml logs -f
+docker-compose -f docker/docker-compose.yml logs -f
 
 # Test the application
 curl http://localhost:3000
 
 # Stop the application
-docker-compose -f docker/docker-compose.dev.yml down
+docker-compose -f docker/docker-compose.yml down
 ```
 
 ### Step 1.4: Test Production Build
@@ -328,30 +328,40 @@ gh secret list --repo Mucrypt/portfolio-app
 ### Step 4.1: Test Docker Build
 
 ```bash
-# Run CI/CD test script
+# Option A (recommended): run the helper
 ./scripts/test-cicd-pipeline.sh docker
+
+# Option B: manual build (no push)
+docker build -t portfolio-app:latest -f docker/Dockerfile .
+docker build -t portfolio-app:dev -f docker/Dockerfile.dev .
 ```
 
-### Step 4.2: Test Local Deployment
+### Step 4.2: Test CI Pipeline
 
 ```bash
-# Test deployment locally
-./scripts/test-cicd-pipeline.sh deploy
-```
+# Trigger CI workflow manually
+gh workflow run ci.yml --ref main
 
-### Step 4.3: Trigger CI Pipeline
-
-```bash
-# Create a test commit
-git add .
-git commit -m "test: Trigger CI/CD pipeline"
-git push origin main
-
-# Watch the pipeline
+# Watch the latest run
+gh run list --limit 5
 gh run watch
+```
 
-# Or view in browser
-gh run list
+### Step 4.3: Verify Deployment Pipeline (Staging)
+
+```bash
+# Staging deploy triggers on pushes to develop
+git checkout develop
+git pull
+git commit --allow-empty -m "test: trigger staging deploy"
+git push origin develop
+
+# Or trigger manually
+gh workflow run cd-staging.yml --ref develop
+
+# Verify rollout (requires AWS + kubectl access to the cluster)
+kubectl get pods -n portfolio-staging
+kubectl rollout status deployment/portfolio-staging -n portfolio-staging
 ```
 
 ### Step 4.4: Manual Pipeline Trigger
@@ -360,8 +370,12 @@ gh run list
 # Trigger CI workflow manually
 gh workflow run ci.yml
 
-# Trigger deployment workflow
-gh workflow run cd-production.yml
+# Production deploy triggers on tags like v1.2.3
+git tag -a v0.0.1 -m "test: production deploy"
+git push origin v0.0.1
+
+# Or trigger via workflow_dispatch
+gh workflow run cd-production.yml -f tag=latest -f reason="Manual deploy"
 ```
 
 ---

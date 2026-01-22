@@ -186,27 +186,27 @@ PORT=3000
 ./scripts/deploy.sh
 
 # Option 2: Manual deployment
-docker-compose -f docker-compose.prod.yml build
-docker-compose -f docker-compose.prod.yml up -d
+docker-compose -f docker/docker-compose.prod.yml build
+docker-compose -f docker/docker-compose.prod.yml up -d
 ```
 
 ### Production Commands
 ```bash
 # View status
-docker-compose -f docker-compose.prod.yml ps
+docker-compose -f docker/docker-compose.prod.yml ps
 
 # View logs
-docker-compose -f docker-compose.prod.yml logs -f
+docker-compose -f docker/docker-compose.prod.yml logs -f
 
 # Restart services
-docker-compose -f docker-compose.prod.yml restart
+docker-compose -f docker/docker-compose.prod.yml restart
 
 # Stop services
-docker-compose -f docker-compose.prod.yml down
+docker-compose -f docker/docker-compose.prod.yml down
 
 # Update application
 git pull origin main
-docker-compose -f docker-compose.prod.yml up -d --build
+docker-compose -f docker/docker-compose.prod.yml up -d --build
 ```
 
 ---
@@ -279,7 +279,7 @@ ssl_certificate_key /etc/nginx/ssl/live/yourdomain.com/privkey.pem;
 
 #### 4. Reload Nginx
 ```bash
-docker-compose -f docker-compose.prod.yml restart nginx
+docker-compose -f docker/docker-compose.prod.yml restart nginx
 ```
 
 ### Certificate Renewal
@@ -291,8 +291,8 @@ Certificates expire every 90 days. Renew them:
 ./scripts/renew-ssl.sh
 
 # Or using Certbot directly
-docker-compose -f docker-compose.certbot.yml run --rm certbot renew
-docker-compose -f docker-compose.prod.yml restart nginx
+docker-compose -f docker/docker-compose.certbot.yml run --rm certbot renew
+docker-compose -f docker/docker-compose.prod.yml restart nginx
 ```
 
 #### Setup Auto-Renewal (Cron)
@@ -394,7 +394,7 @@ cp -r portfolio_backup_*/nginx ../
 cp portfolio_backup_*/.env.production ../
 
 # Restart services
-docker-compose -f docker-compose.prod.yml restart
+docker-compose -f docker/docker-compose.prod.yml restart
 ```
 
 ### Performance Optimization
@@ -546,7 +546,7 @@ docker system prune -a
 LOG_LEVEL=debug
 
 # Restart
-docker-compose -f docker-compose.prod.yml restart
+docker-compose -f docker/docker-compose.prod.yml restart
 ```
 
 #### Access Container Shell

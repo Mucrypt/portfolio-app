@@ -60,11 +60,12 @@ portfolio-app/
 │   └── public/                      # Static assets
 │
 ├── 🐳 DOCKER CONFIGURATION
-│   ├── Dockerfile                    # Production build ✨
-│   ├── Dockerfile.dev                # Development build ✨
-│   ├── docker-compose.yml            # Development environment ✨
-│   ├── docker-compose.prod.yml       # Production environment ✨
-│   ├── .dockerignore                 # Build optimization ✨
+│   ├── docker/                       # Docker artifacts ✨
+│   │   ├── Dockerfile                # Production build ✨
+│   │   ├── Dockerfile.dev            # Development build ✨
+│   │   ├── docker-compose.yml        # Development environment ✨
+│   │   ├── docker-compose.prod.yml   # Production environment ✨
+│   │   └── .dockerignore             # Build optimization ✨
 │   │
 │   └── nginx/                        # Nginx configuration ✨
 │       ├── nginx.conf                # Main config (performance, security)
@@ -160,15 +161,15 @@ portfolio-app/
 
 ### Development
 ```
-docker-compose.yml              # Start: ./scripts/dev.sh
-Dockerfile.dev                  # Hot reload development
+docker/docker-compose.yml        # Start: ./scripts/dev.sh
+docker/Dockerfile.dev            # Hot reload development
 .env.local                      # Local configuration
 ```
 
 ### Production (Local)
 ```
-docker-compose.prod.yml         # Start: ./scripts/deploy.sh
-Dockerfile                      # Optimized production build
+docker/docker-compose.prod.yml   # Start: ./scripts/deploy.sh
+docker/Dockerfile                # Optimized production build
 nginx/                          # Reverse proxy config
 ```
 
