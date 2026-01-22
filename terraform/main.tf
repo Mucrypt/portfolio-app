@@ -125,76 +125,72 @@ module "iam" {
 }
 
 # Kubernetes Provider Configuration
-# Note: These providers are commented out because the k8s add-ons are already deployed via Helm CLI
-# If you need to manage k8s resources via Terraform in the future, uncomment these
-# provider "kubernetes" {
-#   host                   = module.eks.cluster_endpoint
-#   cluster_ca_certificate = base64decode(module.eks.cluster_ca_certificate)
-#
-#   exec {
-#     api_version = "client.authentication.k8s.io/v1beta1"
-#     command     = "aws"
-#     args = [
-#       "eks",
-#       "get-token",
-#       "--cluster-name",
-#       local.cluster_name,
-#       "--region",
-#       var.aws_region
-#     ]
-#   }
-# }
+provider "kubernetes" {
+  host                   = module.eks.cluster_endpoint
+  cluster_ca_certificate = base64decode(module.eks.cluster_ca_certificate)
+
+  exec {
+    api_version = "client.authentication.k8s.io/v1beta1"
+    command     = "aws"
+    args = [
+      "eks",
+      "get-token",
+      "--cluster-name",
+      local.cluster_name,
+      "--region",
+      var.aws_region
+    ]
+  }
+}
 
 # Helm Provider Configuration
-# provider "helm" {
-#   kubernetes {
-#     host                   = module.eks.cluster_endpoint
-#     cluster_ca_certificate = base64decode(module.eks.cluster_ca_certificate)
-#
-#     exec {
-#       api_version = "client.authentication.k8s.io/v1beta1"
-#       command     = "aws"
-#       args = [
-#         "eks",
-#         "get-token",
-#         "--cluster-name",
-#         local.cluster_name,
-#         "--region",
-#         var.aws_region
-#       ]
-#     }
-#   }
-# }
+provider "helm" {
+  kubernetes {
+    host                   = module.eks.cluster_endpoint
+    cluster_ca_certificate = base64decode(module.eks.cluster_ca_certificate)
+
+    exec {
+      api_version = "client.authentication.k8s.io/v1beta1"
+      command     = "aws"
+      args = [
+        "eks",
+        "get-token",
+        "--cluster-name",
+        local.cluster_name,
+        "--region",
+        var.aws_region
+      ]
+    }
+  }
+}
 
 # Kubernetes Addons Module
-# Note: Commented out because add-ons are already deployed via Helm CLI
-# If you need to manage add-ons via Terraform in the future, uncomment this along with the providers above
-# module "k8s_addons" {
-#   source = "./modules/k8s-addons"
-#
-#   project_name = var.project_name
-#   environment  = var.environment
-#   cluster_name = local.cluster_name
-#   aws_region   = var.aws_region
-#   vpc_id       = module.vpc.vpc_id
-#   domain_name  = var.domain_name
-#
-#   enable_nginx_ingress                = var.enable_nginx_ingress
-#   enable_cert_manager                 = var.enable_cert_manager
-#   enable_metrics_server               = var.enable_metrics_server
-#   enable_cluster_autoscaler           = var.enable_cluster_autoscaler
-#   enable_aws_load_balancer_controller = var.enable_aws_load_balancer_controller
-#   enable_external_dns                 = var.enable_external_dns
-#   enable_ebs_csi_driver               = var.enable_ebs_csi_driver
-#
-#   load_balancer_controller_role_arn = module.iam.load_balancer_controller_role_arn
-#   cluster_autoscaler_role_arn       = module.iam.cluster_autoscaler_role_arn
-#   external_dns_role_arn             = module.iam.external_dns_role_arn
-#   cert_manager_role_arn             = module.iam.cert_manager_role_arn
-#   ebs_csi_driver_role_arn           = module.iam.ebs_csi_driver_role_arn
-#
-#   depends_on = [module.eks, module.iam]
-# }
+module "k8s_addons" {
+  source = "./modules/k8s-addons"
+
+  project_name = var.project_name
+  environment  = var.environment
+  cluster_name = local.cluster_name
+  aws_region   = var.aws_region
+  vpc_id       = module.vpc.vpc_id
+  domain_name  = var.domain_name
+
+  enable_ingress_nginx                = var.enable_ingress_nginx
+  enable_cert_manager                 = var.enable_cert_manager
+  enable_metrics_server               = var.enable_metrics_server
+  enable_cluster_autoscaler           = var.enable_cluster_autoscaler
+  enable_aws_load_balancer_controller = var.enable_aws_load_balancer_controller
+  enable_external_dns                 = var.enable_external_dns
+  enable_ebs_csi_driver               = var.enable_ebs_csi_driver
+
+  load_balancer_controller_role_arn = module.iam.load_balancer_controller_role_arn
+  cluster_autoscaler_role_arn       = module.iam.cluster_autoscaler_role_arn
+  external_dns_role_arn             = module.iam.external_dns_role_arn
+  cert_manager_role_arn             = module.iam.cert_manager_role_arn
+  ebs_csi_driver_role_arn           = module.iam.ebs_csi_driver_role_arn
+
+  depends_on = [module.eks, module.iam]
+}
 
 # RDS Module (Optional - for future use if migrating from Supabase)
 # module "rds" {
