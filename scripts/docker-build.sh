@@ -15,6 +15,24 @@ NC='\033[0m' # No Color
 echo -e "${BLUE}=== Portfolio App Docker Build ===${NC}"
 echo
 
+# Pre-flight: ensure Docker daemon is reachable
+if ! command -v docker >/dev/null 2>&1; then
+    echo -e "${RED}Error: docker CLI not found${NC}"
+    echo "Install Docker, then re-run this script."
+    exit 1
+fi
+
+if ! docker info >/dev/null 2>&1; then
+    echo -e "${RED}Error: Cannot connect to the Docker daemon${NC}"
+    echo
+    echo -e "${YELLOW}WSL2 tips:${NC}"
+    echo "- Recommended: install Docker Desktop on Windows and enable WSL integration for this distro."
+    echo "- Then re-run: docker info (should show a Server section)"
+    echo
+    echo "If you do not need local Docker builds, you can still complete Phase 4 by pushing to GitHub and letting GitHub Actions build the image."
+    exit 1
+fi
+
 # Check if .env.local exists
 if [ ! -f ".env.local" ]; then
     echo -e "${RED}Error: .env.local file not found!${NC}"
