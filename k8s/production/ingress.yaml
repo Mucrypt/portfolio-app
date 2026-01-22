@@ -33,7 +33,6 @@ metadata:
     # CORS (if needed)
     nginx.ingress.kubernetes.io/enable-cors: "true"
     nginx.ingress.kubernetes.io/cors-allow-origin: "https://romeomukulah.org"
-
     # Custom headers
 
     # NOTE: ingress-nginx snippet annotations (e.g. server-snippet/configuration-snippet)

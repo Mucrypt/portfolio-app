@@ -6,6 +6,8 @@ on:
     - main
     - develop
     - 'feature/**'
+    tags:
+    - 'v*.*.*'
   pull_request:
     branches:
     - main
@@ -140,6 +142,11 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
+    - name: Compute image repository (lowercase)
+      id: image_repo
+      run: |
+        echo "repo=$(echo \"$GITHUB_REPOSITORY\" | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_OUTPUT"
+
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
 
@@ -154,13 +161,14 @@ jobs:
       id: meta
       uses: docker/metadata-action@v5
       with:
-        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+        images: ${{ env.REGISTRY }}/${{ steps.image_repo.outputs.repo }}
         tags: |
           type=ref,event=branch
           type=ref,event=pr
+          type=ref,event=tag
           type=semver,pattern={{version}}
           type=semver,pattern={{major}}.{{minor}}
-          type=sha,prefix={{branch}}-
+          type=sha,format=long,prefix=
           type=raw,value=latest,enable={{is_default_branch}}
 
     - name: Build and push Docker image
@@ -179,7 +187,7 @@ jobs:
     - name: Scan Docker image for vulnerabilities
       uses: aquasecurity/trivy-action@master
       with:
-        image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+        image-ref: ${{ env.REGISTRY }}/${{ steps.image_repo.outputs.repo }}:${{ github.sha }}
         format: 'sarif'
         output: 'trivy-results.sarif'
       continue-on-error: true

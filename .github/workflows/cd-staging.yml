@@ -13,7 +13,6 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
   KUBE_NAMESPACE: portfolio-staging
 
 jobs:
@@ -33,16 +32,17 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
+    - name: Compute image repository (lowercase)
+      id: image_repo
+      run: |
+        echo "repo=$(echo \"$GITHUB_REPOSITORY\" | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_OUTPUT"
+
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v4
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ secrets.AWS_REGION }}
-
-    - name: Login to Amazon ECR
-      id: login-ecr
-      uses: aws-actions/amazon-ecr-login@v2
 
     - name: Configure kubectl
       run: |
@@ -61,29 +61,47 @@ jobs:
 
     - name: Create Docker registry secret
       run: |
+        if kubectl -n ${{ env.KUBE_NAMESPACE }} get secret ghcr-secret >/dev/null 2>&1; then
+          echo "✅ ghcr-secret already exists; skipping creation"
+          exit 0
+        fi
+
+        if [[ -z "${{ secrets.GHCR_TOKEN }}" ]]; then
+          echo "❌ Missing required secret: GHCR_TOKEN (needs read:packages) and ghcr-secret does not exist"
+          exit 1
+        fi
+        USERNAME="${{ secrets.GHCR_USERNAME || github.repository_owner }}"
+        PASSWORD="${{ secrets.GHCR_TOKEN }}"
         kubectl create secret docker-registry ghcr-secret \
           --docker-server=${{ env.REGISTRY }} \
-          --docker-username=${{ github.actor }} \
-          --docker-password=${{ secrets.GITHUB_TOKEN }} \
+          --docker-username="$USERNAME" \
+          --docker-password="$PASSWORD" \
           --namespace=${{ env.KUBE_NAMESPACE }} \
           --dry-run=client -o yaml | kubectl apply -f -
 
     - name: Create application secrets
       run: |
         kubectl create secret generic app-secrets \
-          --from-literal=NEXT_PUBLIC_SUPABASE_URL="${{ secrets.STAGING_SUPABASE_URL }}" \
-          --from-literal=NEXT_PUBLIC_SUPABASE_ANON_KEY="${{ secrets.STAGING_SUPABASE_ANON_KEY }}" \
+          --from-literal=NEXT_PUBLIC_SUPABASE_URL="${{ secrets.STAGING_SUPABASE_URL || secrets.NEXT_PUBLIC_SUPABASE_URL }}" \
+          --from-literal=NEXT_PUBLIC_SUPABASE_ANON_KEY="${{ secrets.STAGING_SUPABASE_ANON_KEY || secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}" \
           --namespace=${{ env.KUBE_NAMESPACE }} \
           --dry-run=client -o yaml | kubectl apply -f -
 
     - name: Deploy with Helm
       run: |
-        helm upgrade --install portfolio-staging ./helm/portfolio \
+        helm upgrade --install portfolio ./helm/portfolio \
           --namespace ${{ env.KUBE_NAMESPACE }} \
-          --set image.repository=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }} \
+          --set image.repository=${{ env.REGISTRY }}/${{ steps.image_repo.outputs.repo }} \
           --set image.tag=${{ github.sha }} \
           --set environment=staging \
-          --set ingress.host=staging.romeomukulah.org \
+          --set ingress.hosts[0].host=staging.romeomukulah.org \
+          --set ingress.hosts[0].paths[0].path=/ \
+          --set ingress.hosts[0].paths[0].pathType=Prefix \
+          --set ingress.hosts[1].host=www.staging.romeomukulah.org \
+          --set ingress.hosts[1].paths[0].path=/ \
+          --set ingress.hosts[1].paths[0].pathType=Prefix \
+          --set ingress.tls.enabled=true \
+          --set ingress.tls.secretName=staging-romeomukulah-tls \
           --set replicaCount=2 \
           --set resources.requests.cpu=100m \
           --set resources.requests.memory=256Mi \
@@ -94,7 +112,7 @@ jobs:
 
     - name: Verify deployment
       run: |
-        kubectl rollout status deployment/portfolio-staging \
+        kubectl rollout status deployment/portfolio \
           --namespace=${{ env.KUBE_NAMESPACE }} \
           --timeout=5m
 
