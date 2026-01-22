@@ -336,6 +336,33 @@ docker build -t portfolio-app:latest -f docker/Dockerfile .
 docker build -t portfolio-app:dev -f docker/Dockerfile.dev .
 ```
 
+**If Docker fails with** `Cannot connect to the Docker daemon` **or** `System has not been booted with systemd`:
+
+**WSL2 (recommended): Docker Desktop integration**
+- Install Docker Desktop on Windows
+- In Docker Desktop: Settings → Resources → WSL Integration → enable your Ubuntu distro
+- Back in WSL: `docker info` should show a Server section
+
+**WSL2 (alternative): enable systemd in WSL**
+```bash
+# Enable systemd in WSL
+sudo tee /etc/wsl.conf > /dev/null << 'EOF'
+[boot]
+systemd=true
+EOF
+
+# Restart WSL from Windows (PowerShell)
+wsl --shutdown
+
+# After reopening WSL, install Docker Engine and start it
+sudo apt-get update
+sudo apt-get install -y docker-ce docker-ce-cli containerd.io
+sudo systemctl enable --now docker
+
+# Verify
+docker info
+```
+
 ### Step 4.2: Test CI Pipeline
 
 ```bash
