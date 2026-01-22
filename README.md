@@ -422,3 +422,4 @@ Made with ❤️ by [Romeo Mukula](https://romeomukulah.org)
 
 
 </div>
+# Trigger rebuild with correct Supabase config
