@@ -11,7 +11,7 @@ spec:
     kind: Deployment
     name: portfolio-app
 
-  minReplicas: 3
+  minReplicas: 1
   maxReplicas: 10
 
   behavior:

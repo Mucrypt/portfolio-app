@@ -40,7 +40,6 @@ spec:
       # Image pull secrets
       imagePullSecrets:
       - name: ghcr-secret
-
       # Anti-affinity for high availability
       affinity:
         podAntiAffinity:
@@ -91,7 +90,12 @@ spec:
             secretKeyRef:
               name: app-secrets
               key: NEXT_PUBLIC_SUPABASE_ANON_KEY
-
+        - name: REDIS_HOST
+          value: redis.portfolio-production.svc.cluster.local
+        - name: REDIS_PORT
+          value: "6379"
+        - name: REDIS_ENABLED
+          value: "true"
         # Resource limits
         resources:
           requests:
@@ -157,7 +161,6 @@ spec:
         emptyDir: {}
       - name: cache
         emptyDir: {}
-
       # Graceful termination
       terminationGracePeriodSeconds: 30
 
