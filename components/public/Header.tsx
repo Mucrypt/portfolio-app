@@ -46,7 +46,7 @@ export default function Header() {
             </div>
             <div className="hidden sm:block">
               <div className="text-lg font-black text-zinc-900 dark:text-white leading-tight">
-                Romeo Mukula
+                Romeo Mukulah
               </div>
               <div className="text-xs font-bold text-zinc-500 dark:text-zinc-400">
                 Full-Stack Developer
