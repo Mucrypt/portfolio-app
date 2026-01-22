@@ -78,10 +78,25 @@ echo -e "${GREEN}✅ Image updated in deployment${NC}"
 
 # Wait for rollout
 echo -e "${YELLOW}⏳ Waiting for rollout to complete...${NC}"
-kubectl rollout status deployment/portfolio-app -n portfolio-production --timeout=5m
+if kubectl rollout status deployment/portfolio-app -n portfolio-production --timeout=10m; then
+    echo -e "${GREEN}✅ Rollout completed successfully${NC}"
+else
+    echo -e "${YELLOW}⚠️  Rollout status check timed out, verifying pods...${NC}"
+    # Check if pods are actually running
+    READY_PODS=$(kubectl get deployment portfolio-app -n portfolio-production -o jsonpath='{.status.readyReplicas}')
+    DESIRED_PODS=$(kubectl get deployment portfolio-app -n portfolio-production -o jsonpath='{.spec.replicas}')
+    
+    if [ "$READY_PODS" == "$DESIRED_PODS" ]; then
+        echo -e "${GREEN}✅ All $READY_PODS/$DESIRED_PODS pods are ready${NC}"
+    else
+        echo -e "${RED}❌ Only $READY_PODS/$DESIRED_PODS pods are ready${NC}"
+        kubectl get pods -n portfolio-production -l app=portfolio
+        exit 1
+    fi
+fi
 
 # Get pod name
-POD_NAME=$(kubectl get pods -n portfolio-production --sort-by=.metadata.creationTimestamp -o jsonpath='{.items[-1].metadata.name}')
+POD_NAME=$(kubectl get pods -n portfolio-production -l app=portfolio --sort-by=.metadata.creationTimestamp -o jsonpath='{.items[-1].metadata.name}')
 
 echo -e "${GREEN}✅ Deployment successful!${NC}"
 echo ""

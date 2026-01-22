@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
+import BlogPostTracker from "@/components/analytics/BlogPostTracker";
 import { 
   Clock, Calendar, Eye, Heart, MessageCircle, Share2, Bookmark, 
   ArrowLeft, Tag, User, Github, ExternalLink, ChevronRight 
@@ -171,6 +172,9 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Track blog post view */}
+      <BlogPostTracker postId={post.id} postTitle={post.title} category={post.category} />
+      
       {/* Back Navigation */}
       <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
         <div className="container mx-auto px-4 py-3 md:py-4">
