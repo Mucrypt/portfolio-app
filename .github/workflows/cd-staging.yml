@@ -35,7 +35,7 @@ jobs:
     - name: Compute image repository (lowercase)
       id: image_repo
       run: |
-        echo "repo=$(echo \"$GITHUB_REPOSITORY\" | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_OUTPUT"
+        echo "repo=${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
 
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v4
