@@ -49,10 +49,10 @@ echo -e "${YELLOW}🔄 Watching CI workflow (ID: $RUN_ID)...${NC}"
 
 # Watch the workflow
 while true; do
-    STATUS=$(gh run view "$RUN_ID" --json status,conclusion --jq '.status')
+    STATUS=$(gh run view "$RUN_ID" --json status --jq '.status')
     
     if [ "$STATUS" == "completed" ]; then
-        CONCLUSION=$(gh run view "$RUN_ID" --json conclusion --jq -r '.conclusion')
+        CONCLUSION=$(gh run view "$RUN_ID" --json conclusion --jq '.conclusion')
         if [ "$CONCLUSION" == "success" ]; then
             echo -e "${GREEN}✅ CI workflow completed successfully${NC}"
             break
