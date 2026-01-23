@@ -39,3 +39,26 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# terraform
+terraform/.terraform/providers/
+terraform/.terraform/modules/
+terraform/.terraform.lock.hcl
+terraform/*.tfstate
+terraform/*.tfstate.backup
+terraform/tfplan*
+terraform/.terraform.tfstate.lock.info
+
+# Sentry Config File
+.env.sentry-build-plugin
+terraform/.terraform/
+
+# Terraform
+**/.terraform/
+**/.terraform.lock.hcl
+*.tfstate
+*.tfstate.backup
+*.tfvars
+
+# Archived/Old files
+archived-*/

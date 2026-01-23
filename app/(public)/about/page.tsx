@@ -1,4 +1,5 @@
 // app/(public)/about/page.tsx
+import { Suspense } from "react";
 import { createClient } from "@/lib/supabase/server";
 import AboutClient from "./AboutClient";
 
@@ -143,13 +144,15 @@ export default async function AboutPage() {
     ]);
 
   return (
-    <AboutClient
-      aboutPage={aboutPage ?? null}
-      timeline={(timeline ?? []) as AboutTimelineRow[]}
-      sections={(sections ?? []) as AboutSectionRow[]}
-      highlights={(highlights ?? []) as AboutHighlightRow[]}
-      quotes={(quotes ?? []) as AboutQuoteRow[]}
-      softwareSkills={(softwareSkills ?? []) as SkillRow[]}
-    />
+    <Suspense>
+      <AboutClient
+        aboutPage={aboutPage ?? null}
+        timeline={(timeline ?? []) as AboutTimelineRow[]}
+        sections={(sections ?? []) as AboutSectionRow[]}
+        highlights={(highlights ?? []) as AboutHighlightRow[]}
+        quotes={(quotes ?? []) as AboutQuoteRow[]}
+        softwareSkills={(softwareSkills ?? []) as SkillRow[]}
+      />
+    </Suspense>
   );
 }

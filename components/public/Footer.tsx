@@ -91,7 +91,7 @@ export default function Footer() {
               </div>
               <div>
                 <div className="text-lg font-black text-white leading-tight">
-                  Romeo Mukula
+                  Romeo Mukulah
                 </div>
                 <div className="text-xs font-bold text-zinc-400">
                   Full-Stack Developer

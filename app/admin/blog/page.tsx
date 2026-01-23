@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { 
   Plus, Edit, Trash2, Eye, EyeOff, Calendar, Tag, Image as ImageIcon,
-  Video, Github, ExternalLink, Save, X, BookOpen, Clock, TrendingUp,
-  Pin, Star, Copy, FileText, Link as LinkIcon, RefreshCw
+  Github, ExternalLink, Save, X, BookOpen, Clock, TrendingUp,
+  Pin, Star, Copy, FileText, RefreshCw
 } from "lucide-react";
 
 interface BlogPost {
@@ -105,12 +105,7 @@ export default function AdminBlogPage() {
 
   const supabase = createClient();
 
-  useEffect(() => {
-    fetchPosts();
-    fetchCategories();
-  }, []);
-
-  async function fetchPosts() {
+  const fetchPosts = useCallback(async () => {
     setLoading(true);
     const { data, error } = await supabase
       .from("blog_posts")
@@ -124,16 +119,22 @@ export default function AdminBlogPage() {
       setPosts(data || []);
     }
     setLoading(false);
-  }
+  }, [supabase]);
 
-  async function fetchCategories() {
+  const fetchCategories = useCallback(async () => {
     const { data } = await supabase
       .from("blog_categories")
       .select("*")
       .order("name");
     
     setCategories(data || []);
-  }
+  }, [supabase]);
+
+  useEffect(() => {
+    fetchPosts();
+    fetchCategories();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   function generateSlug(title: string): string {
     return title

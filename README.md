@@ -7,10 +7,12 @@
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.0-3178C6?style=for-the-badge&logo=typescript)
 ![Supabase](https://img.shields.io/badge/Supabase-Database-3ECF8E?style=for-the-badge&logo=supabase)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.0-38B2AC?style=for-the-badge&logo=tailwind-css)
+![Vercel](https://img.shields.io/badge/Vercel-Deployed-000000?style=for-the-badge&logo=vercel)
+![Google Analytics](https://img.shields.io/badge/GA4-Analytics-E37400?style=for-the-badge&logo=google-analytics)
 
-A modern, full-stack portfolio website with a powerful admin CMS, built with Next.js 16, React 19, TypeScript, and Supabase. Features include blog management, service offerings, e-commerce shop, project showcase, and real-time inquiry notifications.
+A modern, production-ready full-stack portfolio website with powerful admin CMS, CI/CD pipelines, and serverless deployment on Vercel. Built with Next.js 16, React 19, TypeScript, and Supabase.
 
-[Demo](#) • [Documentation](#features) • [Report Bug](#) • [Request Feature](#)
+[Live Demo](https://romeomukulah.org) • [Documentation](#-documentation) • [Deploy Guide](docs/VERCEL.md) • [Report Bug](#) • [Request Feature](#)
 
 </div>
 
@@ -19,6 +21,7 @@ A modern, full-stack portfolio website with a powerful admin CMS, built with Nex
 ## ✨ Features
 
 ### 🎨 **Public-Facing Portfolio**
+
 - 🏠 **Modern Homepage** - Engaging hero section with smooth animations (GSAP)
 - 📝 **Dynamic Blog** - Markdown support with syntax highlighting and rich content
 - 💼 **Services Showcase** - Detailed service pages with inquiry forms
@@ -28,8 +31,10 @@ A modern, full-stack portfolio website with a powerful admin CMS, built with Nex
 - 📧 **Contact System** - Professional contact forms with inquiry management
 - 🌓 **Dark Mode** - Seamless light/dark theme switching
 - 📱 **Fully Responsive** - Optimized for all devices and screen sizes
+- 📊 **Google Analytics 4** - Comprehensive tracking with 20+ custom events
 
 ### 🔐 **Admin Dashboard & CMS**
+
 - 📊 **Comprehensive Dashboard** - Overview of all content and analytics
 - ✍️ **Blog Management** - Create, edit, publish posts with Markdown editor
 - ⚡ **Services Admin** - Manage service offerings, pricing, and features
@@ -43,8 +48,11 @@ A modern, full-stack portfolio website with a powerful admin CMS, built with Nex
 - 💼 **Experience Tracking** - Manage work history and achievements
 - 🎓 **Education Records** - Academic background management
 - 🖼️ **Media Library** - Centralized asset management
+- 📈 **Analytics Dashboard** - Real-time GA4 data, top pages, traffic sources
+- 🔍 **Error Monitoring** - Track and fix issues quickly
 
 ### 🎯 **Key Highlights**
+
 - ⚡ **Server-Side Rendering** - Blazing-fast performance with Next.js App Router
 - 🔒 **Authentication** - Secure admin access with Supabase Auth
 - 🗄️ **Database Management** - PostgreSQL with comprehensive schemas
@@ -54,12 +62,15 @@ A modern, full-stack portfolio website with a powerful admin CMS, built with Nex
 - 🎭 **Animations** - Smooth transitions with GSAP
 - 🌐 **SEO Optimized** - Meta tags, OpenGraph, structured data
 - 📊 **Analytics Ready** - View counts, inquiry tracking, engagement metrics
+- 🚀 **Serverless Deployment** - Zero maintenance on Vercel
+- 🌍 **Global CDN** - Lightning-fast worldwide with Vercel Edge Network
 
 ---
 
 ## 🛠️ Tech Stack
 
 ### **Frontend**
+
 - **Framework:** Next.js 16.1.4 (App Router)
 - **UI Library:** React 19.2.3
 - **Language:** TypeScript 5
@@ -70,13 +81,23 @@ A modern, full-stack portfolio website with a powerful admin CMS, built with Nex
 - **Markdown:** React Markdown with syntax highlighting
 
 ### **Backend & Database**
+
 - **Database:** Supabase (PostgreSQL)
 - **Authentication:** Supabase Auth
 - **Real-time:** Supabase Realtime
 - **Storage:** Supabase Storage (optional)
 - **ORM:** Supabase Client
+- **Analytics:** Google Analytics 4
+
+### **Infrastructure & DevOps**
+
+- **Hosting:** Vercel (Serverless)
+- **CI/CD:** GitHub Actions
+- **Monitoring:** Vercel Analytics + Custom health checks
+- **Domain:** Custom domain with automatic SSL
 
 ### **Developer Experience**
+
 - **Package Manager:** npm
 - **Linting:** ESLint with Next.js config
 - **Type Safety:** TypeScript strict mode
@@ -87,18 +108,22 @@ A modern, full-stack portfolio website with a powerful admin CMS, built with Nex
 ## 📦 Installation
 
 ### Prerequisites
+
 - Node.js 20.x or higher
 - npm, yarn, pnpm, or bun
 - Supabase account (free tier works!)
+- Vercel account (free tier works!)
 - Git
 
 ### 1. Clone the Repository
+
 ```bash
-git clone https://github.com/yourusername/portfolio-app.git
+git clone https://github.com/Mucrypt/portfolio-app.git
 cd portfolio-app
 ```
 
 ### 2. Install Dependencies
+
 ```bash
 npm install
 # or
@@ -110,6 +135,7 @@ bun install
 ```
 
 ### 3. Environment Setup
+
 Create a `.env.local` file in the root directory:
 
 ```env
@@ -122,12 +148,14 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 ```
 
 **Get your Supabase credentials:**
+
 1. Go to [Supabase Dashboard](https://supabase.com/dashboard)
 2. Create a new project (or use existing)
 3. Go to Settings > API
 4. Copy your `Project URL` and `anon/public` key
 
 ### 4. Database Setup
+
 Run the SQL schemas in your Supabase SQL Editor (in order):
 
 ```bash
@@ -149,11 +177,13 @@ cd database
 ```
 
 **💡 Tip:** You can also use Supabase CLI for migrations:
+
 ```bash
 supabase db push
 ```
 
 ### 5. Run Development Server
+
 ```bash
 npm run dev
 ```
@@ -165,6 +195,7 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 ## 🚀 Usage
 
 ### Access Admin Dashboard
+
 1. Navigate to `/login`
 2. Sign in with your Supabase credentials
 3. Access admin at `/admin`
@@ -172,23 +203,27 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 ### Managing Content
 
 #### **Blog Posts**
+
 - Create new posts with Markdown support
 - Add featured images and categories
 - Publish/unpublish with one click
 - View post analytics (views, engagement)
 
 #### **Services**
+
 - Add service offerings with detailed descriptions
 - Set pricing tiers and packages
 - Manage service inquiries with status tracking
 - Receive real-time notifications for new inquiries
 
 #### **Projects**
+
 - Showcase portfolio work with galleries
 - Add case studies and demos
 - Link to live projects and GitHub repos
 
 #### **Shop Products**
+
 - Create product listings with variants
 - Manage inventory and pricing
 - Track sales and analytics
@@ -249,20 +284,24 @@ portfolio-app/
 ## 🎨 Customization
 
 ### Branding
+
 Update site metadata in `app/layout.tsx`:
+
 ```typescript
 export const metadata: Metadata = {
-  title: "Your Name - Portfolio",
-  description: "Your professional tagline",
-};
+  title: 'Your Name - Portfolio',
+  description: 'Your professional tagline',
+}
 ```
 
 ### Styling
+
 - Modify Tailwind configuration in `tailwind.config.ts`
 - Update global styles in `app/globals.css`
 - Customize component styles with Tailwind classes
 
 ### Features
+
 - Add new admin sections by creating folders in `app/admin/`
 - Create new public pages in `app/(public)/`
 - Extend database schemas in `database/` folder
@@ -278,6 +317,7 @@ The app uses Supabase Authentication with middleware protection:
 - **Middleware:** `middleware.ts` handles auth checks
 
 To configure authentication:
+
 1. Enable Email/Password auth in Supabase Dashboard
 2. Add authorized users in Supabase Auth
 3. Customize redirect URLs in Supabase settings
@@ -296,6 +336,7 @@ To configure authentication:
 4. Deploy!
 
 ### Environment Variables for Production
+
 ```env
 NEXT_PUBLIC_SUPABASE_URL=your_production_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_production_key
@@ -303,6 +344,7 @@ NEXT_PUBLIC_SITE_URL=https://yourdomain.com
 ```
 
 ### Other Platforms
+
 - **Netlify:** Works out of the box
 - **Railway:** Full support
 - **Cloudflare Pages:** Compatible
@@ -313,6 +355,7 @@ NEXT_PUBLIC_SITE_URL=https://yourdomain.com
 ## 📊 Database Schema Overview
 
 ### Core Tables
+
 - **`blog_posts`** - Blog content with categories and tags
 - **`services`** - Service offerings with full details
 - **`service_inquiries`** - Client inquiries with status tracking
@@ -323,6 +366,7 @@ NEXT_PUBLIC_SITE_URL=https://yourdomain.com
 - **Additional tables** for projects, skills, experiences, education
 
 All schemas include:
+
 - UUID primary keys
 - Timestamps (created_at, updated_at)
 - Soft deletes where applicable
@@ -374,14 +418,22 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 If you have any questions or need help:
 
-- Open an [Issue](https://github.com/yourusername/portfolio-app/issues)
-- Email: your.email@example.com
-- Discord: [Join our community](#)
+- Open an [Issue](https://github.com/Mucrypt/portfolio-app/issues)
+- Email: admin@romeomukulah.org
+- Website: [romeomukulah.org](https://romeomukulah.org)
 
 ---
 
 ## 🗺️ Roadmap
 
+- [x] Docker containerization (dev + production)
+- [x] Nginx reverse proxy with SSL
+- [x] GitHub Actions CI/CD pipelines
+- [x] Kubernetes manifests and Helm charts
+- [x] AWS EKS deployment configuration
+- [x] Security scanning (Snyk, Trivy, SonarCloud)
+- [ ] Prometheus + Grafana monitoring
+- [ ] ELK stack for log aggregation
 - [ ] Newsletter subscription system
 - [ ] Advanced analytics dashboard
 - [ ] Multi-language support (i18n)
@@ -389,9 +441,17 @@ If you have any questions or need help:
 - [ ] Comment system for blog
 - [ ] Social media integration
 - [ ] Advanced search functionality
-- [ ] Mobile app (React Native)
 - [ ] API documentation
 - [ ] Automated testing suite
+
+---
+
+## 📚 Documentation
+
+- **[DOCKER.md](docs/DOCKER.md)** - Complete Docker containerization guide
+- **[CICD.md](docs/CICD.md)** - CI/CD pipelines and Kubernetes deployment
+- **[GITHUB_SECRETS.md](docs/GITHUB_SECRETS.md)** - GitHub Actions secrets configuration
+- **[helm/portfolio/README.md](helm/portfolio/README.md)** - Helm chart documentation
 
 ---
 
@@ -399,6 +459,7 @@ If you have any questions or need help:
 
 **⭐ Star this repo if you found it helpful!**
 
-Made with ❤️ by [Romeo Mukula](https://github.com/yourusername)
+Made with ❤️ by [Romeo Mukula](https://romeomukulah.org)
 
 </div>
+# Trigger rebuild with correct Supabase config
