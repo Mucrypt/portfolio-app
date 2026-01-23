@@ -48,3 +48,6 @@ terraform/*.tfstate
 terraform/*.tfstate.backup
 terraform/tfplan*
 terraform/.terraform.tfstate.lock.info
+
+# Sentry Config File
+.env.sentry-build-plugin
