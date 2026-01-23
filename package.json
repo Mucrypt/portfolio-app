@@ -10,16 +10,9 @@
     "lint:summary": "bash scripts/lint-summary.sh",
     "type-check": "tsc --noEmit",
     "deploy": "bash scripts/deploy-to-production.sh",
-    "deploy:github": "bash scripts/deploy-full.sh",
-    "deploy:trigger": "bash scripts/trigger-vercel-deploy.sh",
-    "quick-push": "bash scripts/quick-push.sh",
-    "sync": "bash scripts/sync-branch.sh",
     "check": "bash scripts/pre-deploy-check.sh",
     "status": "bash scripts/status.sh",
-    "clean": "bash scripts/clean-build.sh",
-    "new-feature": "bash scripts/create-feature-branch.sh",
-    "make-executable": "bash scripts/make-scripts-executable.sh",
-    "test-auth": "bash scripts/test-auth.sh"
+    "clean": "bash scripts/clean-build.sh"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
