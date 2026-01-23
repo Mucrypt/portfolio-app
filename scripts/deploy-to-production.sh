@@ -96,12 +96,20 @@ fi
 echo -e "\n${BLUE}🚀 Step 6/7: Deploying to Vercel...${NC}"
 print_info "Starting Vercel deployment..."
 
-# Deploy to production
-if vercel --prod --yes 2>&1 | tee /tmp/vercel-deploy.log; then
+# Deploy to production with filtered output
+# Filter out verbose chunk building messages but keep important info
+if vercel --prod --yes 2>&1 | \
+    grep -v "Building: ~/chunks" | \
+    grep -v "Building: ~/edge" | \
+    grep -v "sourcemap at" | \
+    grep -v "debug id" | \
+    grep -v "^Building: ~/" | \
+    grep -v "warning: could not determine a source map" | \
+    tee /tmp/vercel-deploy.log; then
     print_success "Vercel deployment initiated"
     
-    # Extract deployment URL from log
-    DEPLOY_URL=$(grep -oP 'https://[^\s]+vercel\.app' /tmp/vercel-deploy.log | tail -1)
+    # Extract deployment URL from original unfiltered log
+    DEPLOY_URL=$(vercel ls 2>&1 | grep -oP 'https://[^\s]+vercel\.app' | head -1)
     if [ -n "$DEPLOY_URL" ]; then
         echo -e "\n${GREEN}🌐 Deployment URL: $DEPLOY_URL${NC}"
     fi
