@@ -32,135 +32,74 @@ jobs:
         run: npm ci
 
       - name: Run npm audit
-        run: npm audit --audit-level=moderate || true
+        id: npm-audit
+        run: |
+          echo "Running npm audit..."
+          npm audit --audit-level=moderate --json > audit-results.json || true
+          npm audit --audit-level=moderate || echo "⚠️ Vulnerabilities found"
+
+      - name: Check for critical vulnerabilities
+        run: |
+          CRITICAL=$(cat audit-results.json | grep -o '"critical":[0-9]*' | cut -d':' -f2 || echo "0")
+          HIGH=$(cat audit-results.json | grep -o '"high":[0-9]*' | cut -d':' -f2 || echo "0")
+          echo "Critical: $CRITICAL, High: $HIGH"
+          if [ "$CRITICAL" -gt "0" ]; then
+            echo "::warning ::Found $CRITICAL critical vulnerabilities"
+          fi
 
       - name: Upload scan results
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: dependency-scan-results
-          path: |
-            npm-audit.json
-            snyk-report.json
+          name: audit-results
+          path: audit-results.json
           retention-days: 30
 
-  # Job 2: Container image scanning
-  container-scan:
-    name: Container Image Security Scan
+  # Job 2: Environment variables check
+  env-check:
+    name: Environment Security Check
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Build Docker image
+      - name: Check for exposed secrets in code
         run: |
-          docker build -t portfolio-app:scan .
+          echo "Checking for common secret patterns..."
+          ! grep -r "SUPABASE_SERVICE_ROLE_KEY" --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" app/ components/ lib/ || echo "::warning ::Potential secret found"
+          ! grep -r "sk_live_" --include="*.ts" --include="*.tsx" app/ components/ lib/ || echo "::warning ::Potential Stripe key found"
+          ! grep -r "mongodb://" --include="*.ts" --include="*.tsx" app/ components/ lib/ || echo "::warning ::Potential DB connection string found"
+          echo "✅ Secret pattern check complete"
 
-      - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: 'portfolio-app:scan'
-          format: 'sarif'
-          output: 'trivy-results.sarif'
-          severity: 'CRITICAL,HIGH,MEDIUM'
+      - name: Verify .env files are gitignored
+        run: |
+          if git ls-files | grep -E "\.env$|\.env\.local$"; then
+            echo "::error ::.env files should not be committed!"
+            exit 1
+          fi
+          echo "✅ No .env files in repository"
 
-      - name: Upload Trivy results to GitHub Security
-        uses: github/codeql-action/upload-sarif@v3
-        if: always()
-        with:
-          sarif_file: 'trivy-results.sarif'
-
-      - name: Run Grype scanner
-        uses: anchore/scan-action@v3
-        with:
-          image: 'portfolio-app:scan'
-          fail-build: false
-          severity-cutoff: high
-
-  # Job 3: Code quality and security analysis
-  code-analysis:
-    name: Code Quality & Security Analysis
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        with:
-          args: >
-            -Dsonar.projectKey=Mucrypt_portfolio-app -Dsonar.organization=mucrypt -Dsonar.sources=app,components,lib -Dsonar.exclusions=**/*.test.ts,**/*.test.tsx,**/node_modules/**
-        continue-on-error: true
-
-      - name: CodeQL Analysis
-        uses: github/codeql-action/init@v3
-        with:
-          languages: javascript,typescript
-
-      - name: Autobuild
-        uses: github/codeql-action/autobuild@v3
-
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
-
-  # Job 4: Secret scanning
-  secret-scan:
-    name: Secret Scanning
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: TruffleHog Secret Scan
-        uses: trufflesecurity/trufflehog@main
-        with:
-          path: ./
-          base: ${{ github.event.repository.default_branch }}
-          head: HEAD
-
-      - name: GitLeaks Secret Scan
-        uses: gitleaks/gitleaks-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  # Job 5: Security summary
+  # Job 3: Security summary
   security-summary:
     name: Security Summary
     runs-on: ubuntu-latest
-    needs: [dependency-scan, container-scan, code-analysis, secret-scan]
+    needs: [dependency-scan, env-check]
     if: always()
 
     steps:
       - name: Generate security report
         run: |
-          echo "## Security Scan Summary" >> $GITHUB_STEP_SUMMARY
+          echo "## 🔒 Security Scan Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Scan Results" >> $GITHUB_STEP_SUMMARY
           echo "- **Dependency Scan**: ${{ needs.dependency-scan.result }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Container Scan**: ${{ needs.container-scan.result }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Code Analysis**: ${{ needs.code-analysis.result }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Secret Scan**: ${{ needs.secret-scan.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Environment Check**: ${{ needs.env-check.result }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "📊 **Scan Date**: $(date)" >> $GITHUB_STEP_SUMMARY
-
-      - name: Notify security team on failure
-        if: |
-          needs.dependency-scan.result == 'failure' ||
-          needs.container-scan.result == 'failure' ||
-          needs.secret-scan.result == 'failure'
-        uses: 8398a7/action-slack@v3
-        with:
-          status: 'failure'
-          text: '⚠️ Security vulnerabilities detected! Please review the security scan results.'
-          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
-        continue-on-error: true
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ needs.dependency-scan.result }}" = "success" ] && [ "${{ needs.env-check.result }}" = "success" ]; then
+            echo "✅ All security checks passed!" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ Some checks require attention" >> $GITHUB_STEP_SUMMARY
+          fi

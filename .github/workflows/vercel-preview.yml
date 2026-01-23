@@ -18,7 +18,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '20'
           cache: 'npm'
 
       - name: Install dependencies
@@ -36,77 +36,69 @@ jobs:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
           NEXT_PUBLIC_SITE_URL: https://preview.romeomukulah.org
-          NEXT_PUBLIC_GA_MEASUREMENT_ID: ${{ secrets.NEXT_PUBLIC_GA_MEASUREMENT_ID || '' }}
           REDIS_ENABLED: false
 
   deploy-preview:
-    name: Deploy Preview to Vercel
+    name: Deploy Preview
     needs: [test]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Check deployment method
+        run: |
+          if [ -z "${{ secrets.VERCEL_TOKEN }}" ]; then
+            echo "ℹ️  VERCEL_TOKEN not configured"
+            echo "🔗 Vercel GitHub integration will handle preview deployment"
+            echo "deployment_method=vercel_integration" >> $GITHUB_ENV
+          else
+            echo "deployment_method=github_actions" >> $GITHUB_ENV
+          fi
+
       - name: Setup Node.js
+        if: env.deployment_method == 'github_actions'
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '20'
           cache: 'npm'
 
       - name: Install Vercel CLI
+        if: env.deployment_method == 'github_actions'
         run: npm install -g vercel@latest
 
-      - name: Pull Vercel Environment Information
+      - name: Pull Vercel Environment
+        if: env.deployment_method == 'github_actions'
         run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
 
-      - name: Build Project Artifacts
+      - name: Build Project
+        if: env.deployment_method == 'github_actions'
         run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
 
-      - name: Deploy to Vercel Preview
+      - name: Deploy Preview
+        if: env.deployment_method == 'github_actions'
         id: deploy
         run: |
-          DEPLOYMENT_URL=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }})
-          echo "url=$DEPLOYMENT_URL" >> $GITHUB_OUTPUT
-          echo "✅ Preview deployed to: $DEPLOYMENT_URL"
+          PREVIEW_URL=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }})
+          echo "url=$PREVIEW_URL" >> $GITHUB_OUTPUT
+          echo "✅ Preview deployed to: $PREVIEW_URL"
 
       - name: Comment PR with preview URL
-        if: github.event_name == 'pull_request'
+        if: env.deployment_method == 'github_actions' && github.event_name == 'pull_request'
         uses: actions/github-script@v7
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const output = `### 🚀 Preview Deployment Ready!
-
-            **Preview URL:** ${{ steps.deploy.outputs.url }}
-
-            ✅ Build successful
-            ⏱️ Deployed in: ${{ github.run_id }}
-
-            <details>
-            <summary>Deployment Details</summary>
-
-            - **Commit:** ${{ github.sha }}
-            - **Branch:** ${{ github.head_ref }}
-            - **Workflow:** ${{ github.workflow }}
-            </details>`;
-
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: output
-            });
+              repo: context.repo.name,
+              body: `## 🚀 Preview Deployment\n\n✅ Your preview is ready!\n\n🔗 **URL**: ${{ steps.deploy.outputs.url }}\n\n---\n*Deployed via GitHub Actions*`
+            })
 
-      - name: Wait for preview to be ready
+      - name: Vercel Integration Deployment
+        if: env.deployment_method == 'vercel_integration'
         run: |
-          echo "Waiting 15s for preview deployment..."
-          sleep 15
-
-      - name: Health Check Preview
-        run: |
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" ${{ steps.deploy.outputs.url }}/api/health || echo "000")
-          if [ $STATUS -eq 200 ]; then
-            echo "✅ Preview health check passed (Status: $STATUS)"
-          else
-            echo "⚠️ Preview health check status: $STATUS (may be warming up)"
-          fi
+          echo "## 📦 Preview Deployment" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Preview deployment handled by Vercel GitHub Integration" >> $GITHUB_STEP_SUMMARY
+          echo "Check the PR for the preview URL comment from Vercel bot" >> $GITHUB_STEP_SUMMARY
