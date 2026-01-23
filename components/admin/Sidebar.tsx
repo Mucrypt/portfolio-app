@@ -38,7 +38,7 @@ const menuSections = [
     collapsible: false,
     items: [
       {
-        href: '/admin',
+        href: '/admin/dashboard',
         label: 'Dashboard',
         icon: LayoutDashboard,
         badge: null,
