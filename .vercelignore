@@ -1,0 +1,10 @@
+# Keep AWS scripts for reference
+# These are archived but not deleted in case you need them
+*.tf
+*.tfvars
+docker-compose*.yml
+Dockerfile*
+k8s/**
+helm/**
+terraform/**
+nginx/**

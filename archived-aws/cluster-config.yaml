@@ -1,0 +1,74 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: nexusai-cluster
+  region: eu-north-1
+  version: "1.28"
+
+# VPC Configuration
+vpc:
+  cidr: 10.0.0.0/16
+  nat:
+    gateway: Single # Use single NAT gateway to save costs ($33/month vs $99/month)
+
+# IAM OIDC Provider (required for IAM roles for service accounts)
+iam:
+  withOIDC: true
+
+# Managed Node Groups
+managedNodeGroups:
+- name: nexusai-nodes
+  instanceType: t3.medium # 2 vCPU, 4GB RAM
+  desiredCapacity: 3
+  minSize: 1
+  maxSize: 10
+  volumeSize: 30 # GB per node
+  privateNetworking: false # Use public networking to avoid NAT gateway costs
+  ssh:
+    allow: true
+    publicKeyName: your-key-name # Replace with your SSH key
+  labels:
+    role: worker
+    environment: production
+  tags:
+    Environment: production
+    Project: portfolio-app
+    ManagedBy: eksctl
+  iam:
+    withAddonPolicies:
+      imageBuilder: true
+      autoScaler: true
+      externalDNS: true
+      certManager: true
+      appMesh: true
+      ebs: true
+      fsx: true
+      efs: true
+      albIngress: true
+      xRay: true
+      cloudWatch: true
+
+# Add-ons
+addons:
+- name: vpc-cni
+  version: latest
+- name: coredns
+  version: latest
+- name: kube-proxy
+  version: latest
+- name: aws-ebs-csi-driver
+  version: latest
+
+# CloudWatch Logging
+cloudWatch:
+  clusterLogging:
+    enableTypes: [ "api", "audit", "authenticator", "controllerManager", "scheduler" ]
+
+# Tags for all resources
+tags:
+  Environment: production
+  Project: portfolio-app
+  ManagedBy: eksctl
+  Owner: mukulah
+  CostCenter: portfolio
