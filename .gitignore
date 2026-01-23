@@ -62,3 +62,6 @@ terraform/.terraform/
 
 # Archived/Old files
 archived-*/
+
+# Supabase
+.supabase

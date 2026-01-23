@@ -12,7 +12,6 @@ import {
   Smartphone,
   Monitor,
   RefreshCw,
-  Calendar,
 } from 'lucide-react'
 
 interface UserSession {
@@ -60,10 +59,6 @@ export default function UserActivityPage() {
   const [selectedPeriod, setSelectedPeriod] = useState<'24h' | '7d' | '30d'>(
     '7d',
   )
-
-  useEffect(() => {
-    fetchUserActivity()
-  }, [selectedPeriod])
 
   const fetchUserActivity = async () => {
     setLoading(true)
@@ -194,6 +189,11 @@ export default function UserActivityPage() {
     }
   }
 
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchUserActivity()
+  }, [selectedPeriod])
+
   const formatDuration = (seconds: number) => {
     const minutes = Math.floor(seconds / 60)
     const remainingSeconds = seconds % 60
@@ -242,7 +242,9 @@ export default function UserActivityPage() {
           <div className='flex gap-3'>
             <select
               value={selectedPeriod}
-              onChange={(e) => setSelectedPeriod(e.target.value as any)}
+              onChange={(e) =>
+                setSelectedPeriod(e.target.value as '24h' | '7d' | '30d')
+              }
               className='px-4 py-2 border border-gray-300 rounded-lg font-medium text-gray-700 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500'
             >
               <option value='24h'>Last 24 Hours</option>

@@ -97,10 +97,78 @@ echo -e "\n${BLUE}🚀 Step 6/7: Deploying to Vercel...${NC}"
 print_info "Starting Vercel deployment..."
 
 # Deploy to production with filtered output
-# Filter out verbose chunk building messages but keep important info
+# Filter out verbose build messages but keep URLs and important status
 if vercel --prod --yes 2>&1 | \
+    grep -v "Vercel CLI" | \
+    grep -v "Retrieving project" | \
+    grep -v "Deploying mukulahs-projects" | \
+    grep -v "Uploading \[" | \
     grep -v "Building: ~/chunks" | \
     grep -v "Building: ~/edge" | \
+    grep -v "Building: Running build" | \
+    grep -v "Building: Build machine" | \
+    grep -v "Building: Retrieving list" | \
+    grep -v "Building: Downloading" | \
+    grep -v "Building: Restored build cache" | \
+    grep -v "Building: Running \"vercel build\"" | \
+    grep -v "Building: Vercel CLI" | \
+    grep -v "Building: Running \"install\"" | \
+    grep -v "Building: up to date" | \
+    grep -v "Building: [0-9]* packages" | \
+    grep -v "Building: run \`npm fund\`" | \
+    grep -v "Building: found 0 vulnerabilities" | \
+    grep -v "Building: Detected Next.js" | \
+    grep -v "Building: Running \"npm run build\"" | \
+    grep -v "Building: > portfolio-app" | \
+    grep -v "Building: > next build" | \
+    grep -v "Building: ▲ Next.js" | \
+    grep -v "Building: - Experiments" | \
+    grep -v "Building: ·" | \
+    grep -v "Building: Creating an optimized" | \
+    grep -v "Building: ✓ Compiled successfully" | \
+    grep -v "Building: Running next.config.js" | \
+    grep -v "Building: \[@sentry/nextjs" | \
+    grep -v "Building: > Found [0-9]* files" | \
+    grep -v "Building: > Analyzing" | \
+    grep -v "Building: > Rewriting" | \
+    grep -v "Building: > Adding source map" | \
+    grep -v "Building: > Bundling" | \
+    grep -v "Building: > Bundled" | \
+    grep -v "Building: > Bundle ID:" | \
+    grep -v "Building: > Optimizing" | \
+    grep -v "Building: > Uploading" | \
+    grep -v "Building: > Uploaded files" | \
+    grep -v "Building: > Processing" | \
+    grep -v "Building: > File upload" | \
+    grep -v "Building: > Organization:" | \
+    grep -v "Building: > Projects:" | \
+    grep -v "Building: > Release:" | \
+    grep -v "Building: > Dist:" | \
+    grep -v "Building: > Upload type:" | \
+    grep -v "Building: Source Map Upload" | \
+    grep -v "Building: Scripts" | \
+    grep -v "Building: Source Maps" | \
+    grep -v "Building: ✓ Completed runAfterProductionCompile" | \
+    grep -v "Building: Running TypeScript" | \
+    grep -v "Building: Collecting page data" | \
+    grep -v "Building: ℹ️  Redis caching" | \
+    grep -v "Building: Generating static pages" | \
+    grep -v "Building: ✓ Generating static pages" | \
+    grep -v "Building: Finalizing page" | \
+    grep -v "Building: Route (app)" | \
+    grep -v "Building: ┌" | \
+    grep -v "Building: ├" | \
+    grep -v "Building: └" | \
+    grep -v "Building: ƒ Proxy" | \
+    grep -v "Building: ○  (Static)" | \
+    grep -v "Building: ƒ  (Dynamic)" | \
+    grep -v "Building: Traced Next.js" | \
+    grep -v "Building: Created all serverless" | \
+    grep -v "Building: Collected static files" | \
+    grep -v "Building: Build Completed" | \
+    grep -v "Building: Deploying outputs" | \
+    grep -v "Building: Deployment completed" | \
+    grep -v "Completing..." | \
     grep -v "sourcemap at" | \
     grep -v "debug id" | \
     grep -v "^Building: ~/" | \

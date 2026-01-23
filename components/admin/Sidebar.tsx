@@ -139,6 +139,27 @@ const menuSections = [
     ],
   },
   {
+    id: 'users',
+    title: 'User Management',
+    icon: Users,
+    collapsible: true,
+    defaultOpen: false,
+    items: [
+      {
+        href: '/admin/users',
+        label: 'All Users',
+        icon: Users,
+        badge: null,
+      },
+      {
+        href: '/admin/services/inquiries',
+        label: 'Service Inquiries',
+        icon: Wrench,
+        badge: null,
+      },
+    ],
+  },
+  {
     id: 'analytics',
     title: 'Analytics & Insights',
     icon: BarChart3,

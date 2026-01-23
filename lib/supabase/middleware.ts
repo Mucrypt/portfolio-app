@@ -37,6 +37,20 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
+  // Define routes that require authentication
+  const protectedPublicRoutes = ['/contact', '/shop']
+  const isProtectedRoute = protectedPublicRoutes.some((route) =>
+    request.nextUrl.pathname.startsWith(route),
+  )
+
+  // Redirect unauthenticated users from protected public routes
+  if (isProtectedRoute && !user) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/signup'
+    url.searchParams.set('redirectTo', request.nextUrl.pathname)
+    return NextResponse.redirect(url)
+  }
+
   // Protect admin routes - require authentication
   if (request.nextUrl.pathname.startsWith('/admin')) {
     if (!user) {
@@ -65,7 +79,22 @@ export async function updateSession(request: NextRequest) {
   if (request.nextUrl.pathname === '/login' && user) {
     const redirectTo = request.nextUrl.searchParams.get('redirectTo')
     const url = request.nextUrl.clone()
-    url.pathname = redirectTo || '/admin'
+
+    // Check if user is admin
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('owner_user_id', user.id)
+      .single()
+
+    // Redirect admins to /admin/dashboard, public users to home or their intended destination
+    if (profile) {
+      url.pathname = redirectTo || '/admin/dashboard'
+    } else {
+      // For public users, go to home unless they have a specific non-admin destination
+      url.pathname =
+        redirectTo && !redirectTo.startsWith('/admin') ? redirectTo : '/'
+    }
     url.search = ''
     return NextResponse.redirect(url)
   }

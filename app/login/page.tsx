@@ -15,7 +15,7 @@ function LoginForm() {
   const searchParams = useSearchParams()
   const supabase = createClient()
 
-  const redirectTo = searchParams.get('redirectTo') || '/admin'
+  const redirectTo = searchParams.get('redirectTo') || '/'
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -31,24 +31,41 @@ function LoginForm() {
 
         if (error) throw error
 
-        // Verify user owns a profile (is the portfolio owner)
+        // Check if user is admin (portfolio owner)
         const { data: profile } = await supabase
           .from('profiles')
           .select('id, owner_user_id')
           .eq('owner_user_id', data.user?.id)
           .single()
 
-        if (!profile) {
-          // User authenticated but doesn't own the portfolio
-          await supabase.auth.signOut()
-          setError(
-            'Access denied. Only the portfolio owner can access the admin panel.',
-          )
+        // If admin, redirect to admin panel
+        if (profile) {
+          console.log('Admin logged in:', data.user?.id)
+          router.push('/admin/dashboard')
           return
         }
 
-        console.log('Logged in user ID:', data.user?.id)
-        router.push(redirectTo)
+        // Otherwise, check if public user
+        const { data: publicUser, error: publicUserError } = await supabase
+          .from('public_users')
+          .select('id')
+          .eq('auth_user_id', data.user?.id)
+          .single()
+
+        if (publicUser) {
+          console.log('Public user logged in:', data.user?.id)
+          // Only redirect to admin if explicitly requested, otherwise go to home or intended destination
+          const destination = redirectTo.startsWith('/admin') ? '/' : redirectTo
+          router.push(destination)
+          return
+        }
+
+        // User exists but no profile found
+        console.error('Public user lookup failed:', publicUserError)
+        await supabase.auth.signOut()
+        setError(
+          'Account setup incomplete. This might be a database issue. Please contact support or try signing up again.',
+        )
       } else {
         const { data, error } = await supabase.auth.signUp({
           email,
@@ -100,12 +117,10 @@ function LoginForm() {
 
       <div className='bg-gray-800/50 backdrop-blur-sm border border-gray-700 p-8 rounded-xl shadow-2xl w-full max-w-md'>
         <h1 className='text-3xl font-bold mb-2 text-center bg-linear-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent'>
-          {mode === 'signin' ? 'Admin Login' : 'Create Account'}
+          Welcome Back
         </h1>
         <p className='text-gray-400 text-center mb-6 text-sm'>
-          {mode === 'signin'
-            ? 'Sign in to access the admin dashboard'
-            : 'Create a new admin account'}
+          Sign in to access your account
         </p>
 
         {error && (
@@ -159,22 +174,21 @@ function LoginForm() {
           </button>
         </form>
 
-        <div className='mt-6 text-center text-sm'>
-          <button
-            onClick={() => {
-              setMode(mode === 'signin' ? 'signup' : 'signin')
-              setError('')
-            }}
-            className='text-blue-400 hover:text-blue-300 transition-colors'
-          >
-            {mode === 'signin'
-              ? "Don't have an account? Sign up"
-              : 'Already have an account? Sign in'}
-          </button>
-        </div>
-
-        <div className='mt-6 pt-6 border-t border-gray-700 text-center text-xs text-gray-500'>
-          <p>Admin access only • Portfolio Owner</p>
+        <div className='mt-6 pt-6 border-t border-gray-700'>
+          <p className='text-center text-xs text-gray-500 mb-3'>
+            Admin access only • Portfolio Owner
+          </p>
+          <div className='text-center text-sm'>
+            <span className='text-gray-400'>
+              Looking to create an account?{' '}
+            </span>
+            <Link
+              href={`/signup?redirectTo=${redirectTo}`}
+              className='text-blue-400 hover:text-blue-300 transition-colors font-semibold'
+            >
+              Sign up here
+            </Link>
+          </div>
         </div>
       </div>
     </div>

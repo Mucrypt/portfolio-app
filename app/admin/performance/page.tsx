@@ -51,10 +51,6 @@ export default function PerformancePage() {
     '7d',
   )
 
-  useEffect(() => {
-    fetchPerformanceMetrics()
-  }, [selectedPeriod])
-
   const fetchPerformanceMetrics = async () => {
     setLoading(true)
     try {
@@ -92,6 +88,11 @@ export default function PerformancePage() {
       setLoading(false)
     }
   }
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchPerformanceMetrics()
+  }, [selectedPeriod])
 
   const getRatingColor = (rating: CoreWebVitals['lcp']['rating']) => {
     switch (rating) {
@@ -158,7 +159,9 @@ export default function PerformancePage() {
           <div className='flex gap-3'>
             <select
               value={selectedPeriod}
-              onChange={(e) => setSelectedPeriod(e.target.value as any)}
+              onChange={(e) =>
+                setSelectedPeriod(e.target.value as '24h' | '7d' | '30d')
+              }
               className='px-4 py-2 border border-gray-300 rounded-lg font-medium text-gray-700 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500'
             >
               <option value='24h'>Last 24 Hours</option>
@@ -452,7 +455,9 @@ export default function PerformancePage() {
                     strokeWidth='8'
                     fill='none'
                     strokeDasharray={`${(metrics?.lighthouse?.seo ?? 0 / 100) * 351.86} 351.86`}
-                    className={getScoreBackground(metrics?.lighthouse?.seo ?? 0)}
+                    className={getScoreBackground(
+                      metrics?.lighthouse?.seo ?? 0,
+                    )}
                   />
                 </svg>
                 <div className='absolute'>
