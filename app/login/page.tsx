@@ -40,7 +40,7 @@ function LoginForm() {
 
         // If admin, redirect to admin panel
         if (profile) {
-          console.log('Admin logged in:', data.user?.id)
+          //console.log('Admin logged in:', data.user?.id)
           router.push('/admin/dashboard')
           return
         }
@@ -53,9 +53,13 @@ function LoginForm() {
           .single()
 
         if (publicUser) {
-          console.log('Public user logged in:', data.user?.id)
-          // Only redirect to admin if explicitly requested, otherwise go to home or intended destination
-          const destination = redirectTo.startsWith('/admin') ? '/' : redirectTo
+          //console.log('Public user logged in:', data.user?.id)
+          // Only redirect to admin if explicitly requested, otherwise go to about page or intended destination
+          const destination = redirectTo.startsWith('/admin')
+            ? '/about'
+            : redirectTo === '/'
+              ? '/about'
+              : redirectTo
           router.push(destination)
           return
         }
@@ -74,7 +78,7 @@ function LoginForm() {
 
         if (error) throw error
 
-        console.log('New user created with ID:', data.user?.id)
+        //console.log('New user created with ID:', data.user?.id)
 
         if (data.user?.identities?.length === 0) {
           setError('An account with this email already exists.')

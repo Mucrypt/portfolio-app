@@ -9,30 +9,50 @@ import {
   Mail,
   Wrench,
 } from 'lucide-react'
+import { createClient } from '@/lib/supabase/server'
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  // Check if current user is admin
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  let isAdmin = false
+  if (user) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('owner_user_id', user.id)
+      .single()
+
+    isAdmin = !!profile
+  }
+
   return (
     <div className='min-h-screen bg-linear-to-br from-gray-900 via-gray-800 to-black text-white'>
-      {/* Admin Access - Subtle top-right corner */}
-      <Link
-        href='/admin/dashboard'
-        className='fixed top-4 right-4 z-50 p-2 bg-gray-800/50 rounded-lg border border-gray-700 hover:border-blue-500 hover:bg-gray-800 transition-all opacity-30 hover:opacity-100'
-        title='Admin Dashboard'
-      >
-        <svg
-          className='w-5 h-5 text-gray-400'
-          fill='none'
-          stroke='currentColor'
-          viewBox='0 0 24 24'
+      {/* Admin Access - Only visible to logged-in admins */}
+      {isAdmin && (
+        <Link
+          href='/admin/dashboard'
+          className='fixed top-4 right-4 z-50 p-2 bg-gray-800/50 rounded-lg border border-gray-700 hover:border-blue-500 hover:bg-gray-800 transition-all opacity-30 hover:opacity-100'
+          title='Admin Dashboard'
         >
-          <path
-            strokeLinecap='round'
-            strokeLinejoin='round'
-            strokeWidth={2}
-            d='M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4'
-          />
-        </svg>
-      </Link>
+          <svg
+            className='w-5 h-5 text-gray-400'
+            fill='none'
+            stroke='currentColor'
+            viewBox='0 0 24 24'
+          >
+            <path
+              strokeLinecap='round'
+              strokeLinejoin='round'
+              strokeWidth={2}
+              d='M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4'
+            />
+          </svg>
+        </Link>
+      )}
 
       <div className='container mx-auto px-4 py-16'>
         <div className='max-w-6xl mx-auto'>

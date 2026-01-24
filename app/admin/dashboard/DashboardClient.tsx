@@ -18,6 +18,7 @@ import {
   Zap,
 } from 'lucide-react'
 import UsersWidget from '@/components/admin/UsersWidget'
+import CountryStatsWidget from '@/components/admin/CountryStatsWidget'
 
 type SystemMetrics = {
   counts: {
@@ -137,8 +138,14 @@ export default function DashboardClient({ initialMetrics }: DashboardProps) {
         />
       </div>
 
-      {/* Users Widget */}
-      <UsersWidget />
+      {/* Analytics Widgets */}
+      <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
+        {/* Users Widget */}
+        <UsersWidget />
+
+        {/* Country Stats Widget */}
+        <CountryStatsWidget />
+      </div>
 
       {/* Quick Actions */}
       <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6'>
