@@ -12,21 +12,22 @@ type Course = {
   platform: string
   original_price: number | null
   discounted_price: number | null
-  currency: string
+  currency: string | null
   duration_hours: number | null
-  level: string
+  level: string | null
   category: string
   rating: number | null
-  students_count: number
+  students_count: number | null
   tags: string[] | null
-  is_featured: boolean
+  is_featured: boolean | null
 }
 
-function formatPrice(price: number | null, currency: string) {
+function formatPrice(price: number | null, currency: string | null) {
   if (!price) return 'Free'
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(
-    price,
-  )
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: currency || 'USD',
+  }).format(price)
 }
 
 function formatDuration(hours: number | null) {
@@ -153,12 +154,13 @@ export default async function CoursesPage() {
                               {course.rating}
                             </span>
                           </div>
-                          {course.students_count > 0 && (
-                            <span className='text-xs text-zinc-500 dark:text-zinc-400'>
-                              ({course.students_count.toLocaleString()}{' '}
-                              students)
-                            </span>
-                          )}
+                          {course.students_count &&
+                            course.students_count > 0 && (
+                              <span className='text-xs text-zinc-500 dark:text-zinc-400'>
+                                ({course.students_count.toLocaleString()}{' '}
+                                students)
+                              </span>
+                            )}
                         </div>
                       )}
 

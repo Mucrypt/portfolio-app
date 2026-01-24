@@ -30,9 +30,9 @@ interface BlogPost {
   id: string
   title: string
   slug: string
-  excerpt: string
+  excerpt: string | null
   content: string
-  content_format: string
+  content_format: string | null
   featured_image_url: string | null
   featured_video_url: string | null
   image_urls: string[] | string | null
@@ -40,19 +40,19 @@ interface BlogPost {
   category: string
   subcategory: string | null
   tags: string[] | string | null
-  reading_time_minutes: number
-  views_count: number
-  likes_count: number
-  comments_count: number
-  shares_count: number
+  reading_time_minutes: number | null
+  views_count: number | null
+  likes_count: number | null
+  comments_count: number | null
+  shares_count: number | null
   meta_title: string | null
   meta_description: string | null
   meta_keywords: string[] | string | null
   og_image_url: string | null
   canonical_url: string | null
-  is_published: boolean
-  is_featured: boolean
-  is_pinned: boolean
+  is_published: boolean | null
+  is_featured: boolean | null
+  is_pinned: boolean | null
   publish_date: string | null
   last_updated: string | null
   code_language: string | null
@@ -61,24 +61,24 @@ interface BlogPost {
   series_name: string | null
   series_order: number | null
   related_post_ids: string[] | string | null
-  allow_comments: boolean
-  allow_likes: boolean
+  allow_comments: boolean | null
+  allow_likes: boolean | null
   cta_text: string | null
   cta_url: string | null
   author_user_id: string
-  author_name: string
+  author_name: string | null
   author_avatar_url: string | null
   author_bio: string | null
-  created_at: string
-  updated_at: string
+  created_at: string | null
+  updated_at: string | null
 }
 
 interface Category {
   id: string
   name: string
   slug: string
-  icon: string
-  color: string
+  icon: string | null
+  color: string | null
 }
 
 export default function AdminBlogPage() {
@@ -222,12 +222,40 @@ export default function AdminBlogPage() {
 
     const postData = {
       ...formData,
+      title: formData.title!,
+      content: formData.content!,
       slug: formData.slug || generateSlug(formData.title || ''),
       author_user_id: user.id,
       author_name: formData.author_name || user.email?.split('@')[0] || 'Admin',
       publish_date:
         formData.publish_date ||
         (formData.is_published ? new Date().toISOString() : null),
+      // Normalize array fields
+      tags: Array.isArray(formData.tags)
+        ? formData.tags
+        : formData.tags
+          ? [formData.tags]
+          : null,
+      meta_keywords: Array.isArray(formData.meta_keywords)
+        ? formData.meta_keywords
+        : formData.meta_keywords
+          ? [formData.meta_keywords]
+          : null,
+      image_urls: Array.isArray(formData.image_urls)
+        ? formData.image_urls
+        : formData.image_urls
+          ? [formData.image_urls]
+          : null,
+      video_urls: Array.isArray(formData.video_urls)
+        ? formData.video_urls
+        : formData.video_urls
+          ? [formData.video_urls]
+          : null,
+      related_post_ids: Array.isArray(formData.related_post_ids)
+        ? formData.related_post_ids
+        : formData.related_post_ids
+          ? [formData.related_post_ids]
+          : null,
     }
 
     if (editingPost) {
@@ -312,6 +340,32 @@ export default function AdminBlogPage() {
       shares_count: 0,
       created_at: undefined,
       updated_at: undefined,
+      // Normalize array fields
+      tags: Array.isArray(post.tags)
+        ? post.tags
+        : post.tags
+          ? [post.tags]
+          : null,
+      meta_keywords: Array.isArray(post.meta_keywords)
+        ? post.meta_keywords
+        : post.meta_keywords
+          ? [post.meta_keywords]
+          : null,
+      image_urls: Array.isArray(post.image_urls)
+        ? post.image_urls
+        : post.image_urls
+          ? [post.image_urls]
+          : null,
+      video_urls: Array.isArray(post.video_urls)
+        ? post.video_urls
+        : post.video_urls
+          ? [post.video_urls]
+          : null,
+      related_post_ids: Array.isArray(post.related_post_ids)
+        ? post.related_post_ids
+        : post.related_post_ids
+          ? [post.related_post_ids]
+          : null,
     }
 
     const { error } = await supabase.from('blog_posts').insert([duplicateData])
@@ -660,7 +714,7 @@ export default function AdminBlogPage() {
                           </span>
                           <span className='flex items-center gap-1'>
                             <Eye className='w-4 h-4' />
-                            {post.views_count.toLocaleString()}
+                            {(post.views_count ?? 0).toLocaleString()}
                           </span>
                           <span className='flex items-center gap-1'>
                             <TrendingUp className='w-4 h-4' />
@@ -668,7 +722,7 @@ export default function AdminBlogPage() {
                           </span>
                           <span className='flex items-center gap-1'>
                             <Calendar className='w-4 h-4' />
-                            {new Date(post.created_at).toLocaleDateString()}
+                            {post.created_at ? new Date(post.created_at).toLocaleDateString() : 'N/A'}
                           </span>
                         </div>
                       </div>

@@ -12,7 +12,11 @@
     "deploy": "bash scripts/deploy-to-production.sh",
     "check": "bash scripts/pre-deploy-check.sh",
     "status": "bash scripts/status.sh",
-    "clean": "bash scripts/clean-build.sh"
+    "clean": "bash scripts/clean-build.sh",
+    "db:types": "bash scripts/generate-types.sh",
+    "db:pull": "bash scripts/pull-schema.sh",
+    "db:local": "bash scripts/setup-local-db.sh",
+    "db:local-stop": "supabase stop"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

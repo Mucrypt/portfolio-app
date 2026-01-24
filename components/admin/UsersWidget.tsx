@@ -61,10 +61,12 @@ export default function UsersWidget() {
         inactive: users.filter((u) => !u.is_active).length,
         verified: users.filter((u) => u.email_verified).length,
         unverified: users.filter((u) => !u.email_verified).length,
-        newThisWeek: users.filter((u) => new Date(u.created_at) >= weekAgo)
-          .length,
-        newThisMonth: users.filter((u) => new Date(u.created_at) >= monthAgo)
-          .length,
+        newThisWeek: users.filter(
+          (u) => u.created_at && new Date(u.created_at) >= weekAgo,
+        ).length,
+        newThisMonth: users.filter(
+          (u) => u.created_at && new Date(u.created_at) >= monthAgo,
+        ).length,
       })
 
       setRecentUsers(users.slice(0, 5))

@@ -1,0 +1,16 @@
+apiVersion: v2
+name: portfolio
+description: A production-ready Helm chart for Portfolio Application
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+keywords:
+- portfolio
+- nextjs
+- web-application
+maintainers:
+- name: Romeo Mukula
+  email: admin@romeomukulah.org
+sources:
+- https://github.com/Mucrypt/portfolio-app
+icon: https://romeomukulah.org/favicon.ico

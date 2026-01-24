@@ -1,0 +1,16 @@
+# Kubernetes Deployment Files
+*.swp
+*.swo
+*~
+
+# Helm
+*.tgz
+.helmignore
+
+# Secrets (never commit)
+secrets.yaml
+*-secrets.yaml
+
+# Temporary files
+tmp/
+temp/

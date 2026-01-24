@@ -15,23 +15,24 @@ type Course = {
   affiliate_link: string
   original_price: number | null
   discounted_price: number | null
-  currency: string
+  currency: string | null
   duration_hours: number | null
-  level: string
+  level: string | null
   category: string
   language: string
   rating: number | null
-  students_count: number
+  students_count: number | null
   what_you_learn: string[] | null
   requirements: string[] | null
   tags: string[] | null
 }
 
-function formatPrice(price: number | null, currency: string) {
+function formatPrice(price: number | null, currency: string | null) {
   if (!price) return 'Free'
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(
-    price,
-  )
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: currency || 'USD',
+  }).format(price)
 }
 
 export default async function CourseDetailPage({
@@ -132,11 +133,13 @@ export default async function CourseDetailPage({
                     <span className='font-bold text-zinc-900 dark:text-white'>
                       {typedCourse.rating}
                     </span>
-                    {typedCourse.students_count > 0 && (
-                      <span>
-                        ({typedCourse.students_count.toLocaleString()} students)
-                      </span>
-                    )}
+                    {typedCourse.students_count &&
+                      typedCourse.students_count > 0 && (
+                        <span>
+                          ({typedCourse.students_count.toLocaleString()}{' '}
+                          students)
+                        </span>
+                      )}
                   </div>
                 )}
                 {typedCourse.duration_hours && (

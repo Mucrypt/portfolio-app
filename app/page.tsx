@@ -60,7 +60,7 @@ export default async function LandingPage() {
           <div className='text-center mb-20'>
             <div className='mb-6 inline-block'>
               <span className='px-4 py-2 bg-blue-500/10 border border-blue-500/20 rounded-full text-blue-400 text-sm font-medium'>
-                ✨ Welcome to my portfolio
+                ✨ Welcome to my World
               </span>
             </div>
             <h1 className='text-5xl md:text-7xl font-bold mb-6 bg-linear-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent leading-tight'>

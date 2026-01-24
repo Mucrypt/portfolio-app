@@ -13,7 +13,7 @@ Your portfolio now has **two user types**:
 
 ### 🔧 Core Files Created
 
-1. **Authentication Utilities** ([lib/auth/user.ts](../lib/auth/user.ts))
+1. **Authentication Utilities** ([lib/auth/user.ts](../../lib/auth/user.ts))
    - `signUpUser()` - Create new public user accounts
    - `signInUser()` - Sign in existing users
    - `signOut()` - Sign out current user
@@ -22,27 +22,27 @@ Your portfolio now has **two user types**:
    - `getUserRole()` - Get user's role (admin/user)
    - `getCurrentUserProfile()` - Get current user's profile
 
-2. **Auth Context** ([lib/auth/AuthProvider.tsx](../lib/auth/AuthProvider.tsx))
+2. **Auth Context** ([lib/auth/AuthProvider.tsx](../../lib/auth/AuthProvider.tsx))
    - React context for authentication state
    - `useAuth()` hook for accessing auth state
    - Automatic session management
 
 3. **Pages**
-   - [app/signup/page.tsx](../app/signup/page.tsx) - User registration
-   - [app/login/page.tsx](../app/login/page.tsx) - Admin login (updated)
+   - [app/signup/page.tsx](../../app/signup/page.tsx) - User registration
+   - [app/login/page.tsx](../../app/login/page.tsx) - Admin login (updated)
 
-4. **Middleware** ([middleware.ts](../middleware.ts))
+4. **Middleware** ([middleware.ts](../../middleware.ts))
    - Protects admin routes
    - Redirects unauthenticated users from protected routes
    - Handles session management
 
-5. **Header Component** ([components/public/Header.tsx](../components/public/Header.tsx))
+5. **Header Component** ([components/public/Header.tsx](../../components/public/Header.tsx))
    - Login/Signup buttons for guests
    - User profile display when logged in
    - Sign out functionality
    - Admin dashboard link for admins
 
-6. **Database Schema** ([database/schema-public-users.sql](../database/schema-public-users.sql))
+6. **Database Schema** ([database/schema-public-users.sql](../../database/schema-public-users.sql))
    - Complete SQL for all tables
    - Row Level Security (RLS) policies
    - Indexes for performance

@@ -119,11 +119,7 @@ export default async function ProjectsPage() {
                 {project.project_links && project.project_links.length > 0 && (
                   <div className='flex flex-wrap gap-2 pt-4 border-t border-zinc-200 dark:border-zinc-700'>
                     {project.project_links.map(
-                      (link: {
-                        id: string
-                        url: string
-                        link_text: string
-                      }) => (
+                      (link: { id: string; url: string; label: string }) => (
                         <a
                           key={link.id}
                           href={link.url}
@@ -131,7 +127,7 @@ export default async function ProjectsPage() {
                           rel='noopener noreferrer'
                           className='px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors'
                         >
-                          {link.link_text}
+                          {link.label}
                         </a>
                       ),
                     )}

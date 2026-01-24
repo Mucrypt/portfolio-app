@@ -390,9 +390,9 @@ This will:
 ## 📚 Documentation
 
 - **Quick Setup**: [AUTH-SETUP.md](AUTH-SETUP.md)
-- **SQL Schema**: [database/schema-public-users.sql](database/schema-public-users.sql)
-- **Auth Utilities**: [lib/auth/user.ts](lib/auth/user.ts)
-- **Auth Context**: [lib/auth/AuthProvider.tsx](lib/auth/AuthProvider.tsx)
+- **SQL Schema**: [database/schema-public-users.sql](../database/schema-public-users.sql)
+- **Auth Utilities**: [lib/auth/user.ts](../lib/auth/user.ts)
+- **Auth Context**: [lib/auth/AuthProvider.tsx](../lib/auth/AuthProvider.tsx)
 
 ---
 

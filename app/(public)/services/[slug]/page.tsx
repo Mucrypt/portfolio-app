@@ -8,18 +8,18 @@ interface Service {
   id: string
   name: string
   slug: string
-  tagline: string
+  tagline: string | null
   description: string
-  full_description: string
-  icon: string
-  color: string
-  featured_image_url: string
+  full_description: string | null
+  icon: string | null
+  color: string | null
+  featured_image_url: string | null
   category: string
-  subcategories: string[]
-  service_type: string
-  base_price: number
-  price_currency: string
-  price_unit: string
+  subcategories: string[] | null
+  service_type: string | null
+  base_price: number | null
+  price_currency: string | null
+  price_unit: string | null
   pricing_tiers: Array<{
     name: string
     price: number
@@ -77,13 +77,13 @@ export async function generateMetadata({
     openGraph: {
       title: service.meta_title || service.name,
       description: service.meta_description || service.description,
-      images: [service.featured_image_url],
+      images: service.featured_image_url ? [service.featured_image_url] : [],
     },
     twitter: {
       card: 'summary_large_image',
       title: service.meta_title || service.name,
       description: service.meta_description || service.description,
-      images: [service.featured_image_url],
+      images: service.featured_image_url ? [service.featured_image_url] : [],
     },
   }
 }
@@ -108,23 +108,43 @@ export default async function ServiceDetailPage({
     notFound()
   }
 
-  const pricingTiers = service.pricing_tiers || []
-  const processSteps = service.process_steps || []
-  const faqs = service.faqs || []
+  type PricingTier = {
+    name: string
+    price: number
+    features: string[]
+  }
+
+  type ProcessStep = {
+    step: number
+    title: string
+    description: string
+    duration?: string
+  }
+
+  type FAQ = {
+    question: string
+    answer: string
+  }
+
+  const pricingTiers = (service.pricing_tiers as PricingTier[]) || []
+  const processSteps = (service.process_steps as ProcessStep[]) || []
+  const faqs = (service.faqs as FAQ[]) || []
 
   return (
     <div className='min-h-screen bg-white'>
       {/* Hero Section */}
       <section className='relative overflow-hidden bg-linear-to-br from-slate-900 via-slate-800 to-slate-900 text-white'>
         {/* Background Image */}
-        <div className='absolute inset-0'>
-          <Image
-            src={service.featured_image_url}
-            alt={service.name}
-            fill
-            className='object-cover opacity-20'
-          />
-        </div>
+        {service.featured_image_url && (
+          <div className='absolute inset-0'>
+            <Image
+              src={service.featured_image_url}
+              alt={service.name}
+              fill
+              className='object-cover opacity-20'
+            />
+          </div>
+        )}
 
         {/* Gradient Overlay */}
         <div className='absolute inset-0 bg-linear-to-br from-blue-600/30 via-purple-600/30 to-pink-600/30'></div>
@@ -173,7 +193,8 @@ export default async function ServiceDetailPage({
                 <div className='text-2xl font-bold'>
                   $
                   {pricingTiers[0]?.price?.toLocaleString() ||
-                    service.base_price.toLocaleString()}
+                    service.base_price?.toLocaleString() ||
+                    'Contact'}
                 </div>
               </div>
               <div className='bg-white/10 backdrop-blur-sm rounded-xl p-4'>
@@ -329,60 +350,53 @@ export default async function ServiceDetailPage({
             </div>
 
             <div className='grid md:grid-cols-3 gap-8'>
-              {pricingTiers.map(
-                (
-                  tier: { name: string; price: number; features: string[] },
-                  index: number,
-                ) => (
-                  <div
-                    key={index}
-                    className={`relative bg-white rounded-2xl border-2 p-8 hover:shadow-2xl transition-all transform hover:-translate-y-2 ${
+              {pricingTiers.map((tier, index) => (
+                <div
+                  key={index}
+                  className={`relative bg-white rounded-2xl border-2 p-8 hover:shadow-2xl transition-all transform hover:-translate-y-2 ${
+                    index === 1
+                      ? 'border-blue-500 shadow-xl scale-105'
+                      : 'border-slate-200'
+                  }`}
+                >
+                  {index === 1 && (
+                    <div className='absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 bg-linear-to-r from-blue-600 to-purple-600 text-white rounded-full text-sm font-bold'>
+                      Most Popular
+                    </div>
+                  )}
+
+                  <div className='text-center mb-6'>
+                    <h3 className='text-2xl font-bold mb-2'>{tier.name}</h3>
+                    <div className='text-5xl font-bold mb-2'>
+                      ${tier.price?.toLocaleString()}
+                    </div>
+                    <div className='text-gray-600'>{service.price_unit}</div>
+                  </div>
+
+                  <ul className='space-y-3 mb-8'>
+                    {tier.features?.map((feature: string, fIndex: number) => (
+                      <li
+                        key={fIndex}
+                        className='flex items-start text-gray-700'
+                      >
+                        <span className='mr-2 text-green-500 shrink-0'>✓</span>
+                        <span>{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <a
+                    href='#inquiry-form'
+                    className={`block w-full px-6 py-3 rounded-full font-bold text-center transition-all ${
                       index === 1
-                        ? 'border-blue-500 shadow-xl scale-105'
-                        : 'border-slate-200'
+                        ? 'bg-linear-to-r from-blue-600 to-purple-600 text-white hover:shadow-lg'
+                        : 'bg-slate-100 text-slate-900 hover:bg-slate-200'
                     }`}
                   >
-                    {index === 1 && (
-                      <div className='absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 bg-linear-to-r from-blue-600 to-purple-600 text-white rounded-full text-sm font-bold'>
-                        Most Popular
-                      </div>
-                    )}
-
-                    <div className='text-center mb-6'>
-                      <h3 className='text-2xl font-bold mb-2'>{tier.name}</h3>
-                      <div className='text-5xl font-bold mb-2'>
-                        ${tier.price?.toLocaleString()}
-                      </div>
-                      <div className='text-gray-600'>{service.price_unit}</div>
-                    </div>
-
-                    <ul className='space-y-3 mb-8'>
-                      {tier.features?.map((feature: string, fIndex: number) => (
-                        <li
-                          key={fIndex}
-                          className='flex items-start text-gray-700'
-                        >
-                          <span className='mr-2 text-green-500 shrink-0'>
-                            ✓
-                          </span>
-                          <span>{feature}</span>
-                        </li>
-                      ))}
-                    </ul>
-
-                    <a
-                      href='#inquiry-form'
-                      className={`block w-full px-6 py-3 rounded-full font-bold text-center transition-all ${
-                        index === 1
-                          ? 'bg-linear-to-r from-blue-600 to-purple-600 text-white hover:shadow-lg'
-                          : 'bg-slate-100 text-slate-900 hover:bg-slate-200'
-                      }`}
-                    >
-                      Select {tier.name}
-                    </a>
-                  </div>
-                ),
-              )}
+                    Select {tier.name}
+                  </a>
+                </div>
+              ))}
             </div>
           </div>
         </section>
@@ -400,33 +414,23 @@ export default async function ServiceDetailPage({
             </div>
 
             <div className='space-y-6'>
-              {processSteps.map(
-                (
-                  step: {
-                    step: number
-                    title: string
-                    description: string
-                    duration?: string
-                  },
-                  index: number,
-                ) => (
-                  <div
-                    key={index}
-                    className='flex gap-6 items-start bg-white rounded-xl p-8 border border-slate-200 hover:border-blue-300 hover:shadow-lg transition-all'
-                  >
-                    <div className='shrink-0 w-16 h-16 bg-linear-to-br from-blue-500 to-purple-600 text-white rounded-xl flex items-center justify-center text-2xl font-bold'>
-                      {step.step}
-                    </div>
-                    <div className='flex-1'>
-                      <h3 className='text-2xl font-bold mb-2'>{step.title}</h3>
-                      <p className='text-gray-700 mb-2'>{step.description}</p>
-                      <div className='text-sm text-blue-600 font-semibold'>
-                        ⏱️ {step.duration}
-                      </div>
+              {processSteps.map((step, index) => (
+                <div
+                  key={index}
+                  className='flex gap-6 items-start bg-white rounded-xl p-8 border border-slate-200 hover:border-blue-300 hover:shadow-lg transition-all'
+                >
+                  <div className='shrink-0 w-16 h-16 bg-linear-to-br from-blue-500 to-purple-600 text-white rounded-xl flex items-center justify-center text-2xl font-bold'>
+                    {step.step}
+                  </div>
+                  <div className='flex-1'>
+                    <h3 className='text-2xl font-bold mb-2'>{step.title}</h3>
+                    <p className='text-gray-700 mb-2'>{step.description}</p>
+                    <div className='text-sm text-blue-600 font-semibold'>
+                      ⏱️ {step.duration}
                     </div>
                   </div>
-                ),
-              )}
+                </div>
+              ))}
             </div>
           </div>
         </section>
@@ -575,7 +579,7 @@ export default async function ServiceDetailPage({
             </p>
           </div>
 
-          <InquiryForm service={service} />
+          <InquiryForm service={service as Service} />
         </div>
       </section>
     </div>
@@ -590,23 +594,41 @@ function InquiryForm({ service }: { service: Service }) {
         'use server'
         const supabase = await createClient()
 
+        const email = formData.get('email') as string | null
+        if (!email) {
+          throw new Error('Email is required')
+        }
+
+        const name = formData.get('name') as string | null
+        if (!name) {
+          throw new Error('Name is required')
+        }
+
+        const message = formData.get('message') as string | null
+        if (!message) {
+          throw new Error('Message is required')
+        }
+
         const inquiry = {
           service_id: service.id,
-          name: formData.get('name'),
-          email: formData.get('email'),
-          phone: formData.get('phone'),
-          company: formData.get('company'),
-          website: formData.get('website'),
+          name: name,
+          email: email,
+          phone: formData.get('phone') as string | null,
+          company: formData.get('company') as string | null,
+          website: formData.get('website') as string | null,
           subject: `Inquiry for ${service.name}`,
-          message: formData.get('message'),
-          budget_range: formData.get('budget_range'),
-          timeline: formData.get('timeline'),
-          project_description: formData.get('project_description'),
+          message: message,
+          budget_range: formData.get('budget_range') as string | null,
+          timeline: formData.get('timeline') as string | null,
+          project_description: formData.get('project_description') as
+            | string
+            | null,
           specific_requirements: formData.get('specific_requirements')
             ? [formData.get('specific_requirements') as string]
             : null,
-          preferred_start_date: formData.get('preferred_start_date') || null,
-          urgency: formData.get('urgency') || 'medium',
+          preferred_start_date:
+            (formData.get('preferred_start_date') as string) || null,
+          urgency: (formData.get('urgency') as string) || 'medium',
           status: 'new',
           priority: 'medium',
         }

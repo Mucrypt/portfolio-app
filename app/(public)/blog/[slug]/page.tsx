@@ -29,24 +29,24 @@ interface BlogPost {
   id: string
   title: string
   slug: string
-  excerpt: string
+  excerpt: string | null
   content: string
-  content_format: string
+  content_format: string | null
   featured_image_url: string | null
   featured_video_url: string | null
   image_urls: string[] | null
   video_urls: string[] | null
   category: string
   subcategory: string | null
-  tags: string[]
-  reading_time_minutes: number
-  views_count: number
-  likes_count: number
-  comments_count: number
-  shares_count: number
-  publish_date: string
+  tags: string[] | null
+  reading_time_minutes: number | null
+  views_count: number | null
+  likes_count: number | null
+  comments_count: number | null
+  shares_count: number | null
+  publish_date: string | null
   author_user_id: string
-  author_name: string
+  author_name: string | null
   author_avatar_url: string | null
   author_bio: string | null
   meta_title: string | null
@@ -66,20 +66,20 @@ interface RelatedBlogPost {
   id: string
   title: string
   slug: string
-  excerpt: string
+  excerpt: string | null
   featured_image_url: string | null
   category: string
-  reading_time_minutes: number
-  publish_date: string
+  reading_time_minutes: number | null
+  publish_date: string | null
 }
 
 interface Comment {
   id: string
   content: string
   author_name: string
-  author_email: string
-  likes_count: number
-  created_at: string
+  author_email: string | null
+  likes_count: number | null
+  created_at: string | null
   parent_comment_id: string | null
 }
 
@@ -101,11 +101,11 @@ async function getBlogPost(slug: string): Promise<BlogPost | null> {
   // Increment view count (fire and forget)
   supabase
     .from('blog_posts')
-    .update({ views_count: data.views_count + 1 })
+    .update({ views_count: (data.views_count || 0) + 1 })
     .eq('id', data.id)
     .then()
 
-  return data
+  return data as BlogPost
 }
 
 async function getRelatedPosts(
@@ -159,18 +159,18 @@ export async function generateMetadata({
 
   return {
     title: post.meta_title || `${post.title} | Blog`,
-    description: post.meta_description || post.excerpt,
+    description: post.meta_description || post.excerpt || undefined,
     openGraph: {
       title: post.meta_title || post.title,
-      description: post.meta_description || post.excerpt,
+      description: post.meta_description || post.excerpt || undefined,
       images: post.featured_image_url ? [post.featured_image_url] : [],
       type: 'article',
-      publishedTime: post.publish_date,
+      publishedTime: post.publish_date || undefined,
     },
     twitter: {
       card: 'summary_large_image',
       title: post.meta_title || post.title,
-      description: post.meta_description || post.excerpt,
+      description: post.meta_description || post.excerpt || undefined,
       images: post.featured_image_url ? [post.featured_image_url] : [],
     },
   }
@@ -294,7 +294,7 @@ export default async function BlogPostPage({
                     {post.author_avatar_url ? (
                       <Image
                         src={post.author_avatar_url}
-                        alt={post.author_name}
+                        alt={post.author_name || 'Author'}
                         width={48}
                         height={48}
                         className='rounded-full md:w-15 md:h-15'
@@ -317,24 +317,28 @@ export default async function BlogPostPage({
                         <span className='flex items-center gap-1'>
                           <Calendar className='w-3 h-3 md:w-4 md:h-4' />
                           <span className='hidden sm:inline'>
-                            {new Date(post.publish_date).toLocaleDateString(
-                              'en-US',
-                              {
-                                year: 'numeric',
-                                month: 'long',
-                                day: 'numeric',
-                              },
-                            )}
+                            {post.publish_date
+                              ? new Date(post.publish_date).toLocaleDateString(
+                                  'en-US',
+                                  {
+                                    year: 'numeric',
+                                    month: 'long',
+                                    day: 'numeric',
+                                  },
+                                )
+                              : 'N/A'}
                           </span>
                           <span className='sm:hidden'>
-                            {new Date(post.publish_date).toLocaleDateString(
-                              'en-US',
-                              {
-                                month: 'short',
-                                day: 'numeric',
-                                year: 'numeric',
-                              },
-                            )}
+                            {post.publish_date
+                              ? new Date(post.publish_date).toLocaleDateString(
+                                  'en-US',
+                                  {
+                                    month: 'short',
+                                    day: 'numeric',
+                                    year: 'numeric',
+                                  },
+                                )
+                              : 'N/A'}
                           </span>
                         </span>
                         <span>•</span>
@@ -355,12 +359,12 @@ export default async function BlogPostPage({
                     <span className='flex items-center gap-1'>
                       <Eye className='w-4 h-4 md:w-5 md:h-5' />
                       <span className='hidden sm:inline'>
-                        {post.views_count.toLocaleString()}
+                        {(post.views_count || 0).toLocaleString()}
                       </span>
                       <span className='sm:hidden'>
-                        {post.views_count > 999
-                          ? `${(post.views_count / 1000).toFixed(1)}k`
-                          : post.views_count}
+                        {(post.views_count || 0) > 999
+                          ? `${((post.views_count || 0) / 1000).toFixed(1)}k`
+                          : post.views_count || 0}
                       </span>
                     </span>
                     <span className='flex items-center gap-1'>
@@ -662,7 +666,9 @@ function CommentCard({
               {comment.author_name}
             </p>
             <span className='text-xs text-gray-500 dark:text-gray-400'>
-              {new Date(comment.created_at).toLocaleDateString()}
+              {comment.created_at
+                ? new Date(comment.created_at).toLocaleDateString()
+                : 'N/A'}
             </span>
           </div>
           <p className='text-gray-700 dark:text-gray-300 text-sm mb-2'>
@@ -692,7 +698,9 @@ function CommentCard({
                         {reply.author_name}
                       </p>
                       <span className='text-xs text-gray-500 dark:text-gray-400'>
-                        {new Date(reply.created_at).toLocaleDateString()}
+                        {reply.created_at
+                          ? new Date(reply.created_at).toLocaleDateString()
+                          : 'N/A'}
                       </span>
                     </div>
                     <p className='text-gray-700 dark:text-gray-300 text-sm'>

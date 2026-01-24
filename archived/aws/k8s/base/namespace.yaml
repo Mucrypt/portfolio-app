@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: portfolio-production
+  labels:
+    name: portfolio-production
+    environment: production
+    managed-by: kubernetes
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: portfolio-staging
+  labels:
+    name: portfolio-staging
+    environment: staging
+    managed-by: kubernetes

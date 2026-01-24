@@ -60,8 +60,5 @@ terraform/.terraform/
 *.tfstate.backup
 *.tfvars
 
-# Archived/Old files
-archived-*/
-
 # Supabase
 .supabase

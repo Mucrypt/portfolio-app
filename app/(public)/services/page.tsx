@@ -6,16 +6,16 @@ interface Service {
   id: string
   name: string
   slug: string
-  tagline: string
+  tagline: string | null
   description: string
-  icon: string
-  color: string
-  featured_image_url: string
+  icon: string | null
+  color: string | null
+  featured_image_url: string | null
   category: string
-  service_type: string
-  base_price: number
-  price_currency: string
-  price_unit: string
+  service_type: string | null
+  base_price: number | null
+  price_currency: string | null
+  price_unit: string | null
   pricing_tiers: Array<{
     name: string
     price: number
@@ -118,8 +118,11 @@ export default async function ServicesPage() {
             </div>
 
             <div className='grid md:grid-cols-2 gap-8'>
-              {featuredServices.map((service: Service) => (
-                <FeaturedServiceCard key={service.id} service={service} />
+              {featuredServices.map((service) => (
+                <FeaturedServiceCard
+                  key={service.id}
+                  service={service as Service}
+                />
               ))}
             </div>
           </div>
@@ -139,8 +142,8 @@ export default async function ServicesPage() {
           </div>
 
           <div className='grid md:grid-cols-2 lg:grid-cols-4 gap-8'>
-            {services?.map((service: Service) => (
-              <ServiceCard key={service.id} service={service} />
+            {services?.map((service) => (
+              <ServiceCard key={service.id} service={service as Service} />
             ))}
           </div>
         </div>
@@ -259,12 +262,14 @@ function FeaturedServiceCard({ service }: { service: Service }) {
     >
       {/* Background Image */}
       <div className='absolute inset-0 bg-linear-to-br from-slate-900 to-slate-800'>
-        <Image
-          src={service.featured_image_url}
-          alt={service.name}
-          fill
-          className='object-cover opacity-40 group-hover:opacity-50 transition-opacity duration-300'
-        />
+        {service.featured_image_url && (
+          <Image
+            src={service.featured_image_url}
+            alt={service.name}
+            fill
+            className='object-cover opacity-40 group-hover:opacity-50 transition-opacity duration-300'
+          />
+        )}
       </div>
 
       {/* Badges */}

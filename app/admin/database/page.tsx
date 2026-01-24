@@ -77,7 +77,9 @@ export default function DatabaseManagementPage() {
         supabase.from('blog_posts').select('*', { count: 'exact', head: true }),
         supabase.from('courses').select('*', { count: 'exact', head: true }),
         supabase.from('services').select('*', { count: 'exact', head: true }),
-        supabase.from('shop_items').select('*', { count: 'exact', head: true }),
+        supabase
+          .from('shop_products')
+          .select('*', { count: 'exact', head: true }),
         supabase.from('skills').select('*', { count: 'exact', head: true }),
         supabase.from('education').select('*', { count: 'exact', head: true }),
         supabase

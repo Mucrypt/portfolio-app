@@ -7,16 +7,16 @@ type ShopProduct = {
   id: string
   title: string
   slug: string
-  short_description: string
+  short_description: string | null
   description: string
-  product_type: 'physical' | 'digital' | 'affiliate'
+  product_type: string
   category: string
-  subcategory: string
+  subcategory: string | null
   thumbnail_url: string
   image_urls: string[] | null
   original_price: number
   discounted_price: number | null
-  currency: string
+  currency: string | null
   affiliate_link: string | null
   external_product_url: string | null
   demo_url: string | null
@@ -25,23 +25,23 @@ type ShopProduct = {
   file_format: string | null
   version: string | null
   features: string[] | null
-  specifications: Record<string, unknown> | null
+  specifications: any
   tech_stack: string[] | null
   compatibility: string[] | null
   requirements: string[] | null
   included_items: string[] | null
-  tags: string[]
-  rating: number
-  reviews_count: number
-  purchases_count: number
-  is_featured: boolean
-  is_bestseller: boolean
-  is_new: boolean
+  tags: string[] | null
+  rating: number | null
+  reviews_count: number | null
+  purchases_count: number | null
+  is_featured: boolean | null
+  is_bestseller: boolean | null
+  is_new: boolean | null
   license_type: string | null
   usage_rights: string | null
 }
 
-function formatPrice(price: number | null, currency: string): string {
+function formatPrice(price: number | null, currency: string | null): string {
   if (!price) return 'Free'
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
@@ -216,7 +216,7 @@ export default async function ProductDetailPage({
                       <span
                         key={i}
                         className={`text-xl ${
-                          i < Math.floor(product.rating)
+                          i < Math.floor(product.rating || 0)
                             ? 'text-yellow-400'
                             : 'text-gray-300'
                         }`}
@@ -226,7 +226,7 @@ export default async function ProductDetailPage({
                     ))}
                   </div>
                   <span className='font-semibold text-gray-900'>
-                    {product.rating.toFixed(1)}
+                    {(product.rating || 0).toFixed(1)}
                   </span>
                   <span className='text-gray-600'>
                     ({product.reviews_count} reviews)

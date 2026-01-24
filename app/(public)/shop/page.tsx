@@ -6,25 +6,25 @@ type ShopProduct = {
   id: string
   title: string
   slug: string
-  short_description: string
-  product_type: 'physical' | 'digital' | 'affiliate'
+  short_description: string | null
+  product_type: string
   category: string
-  subcategory: string
+  subcategory: string | null
   thumbnail_url: string
   original_price: number
   discounted_price: number | null
-  currency: string
-  rating: number
-  reviews_count: number
-  purchases_count: number
-  is_featured: boolean
-  is_bestseller: boolean
-  is_new: boolean
-  tags: string[]
+  currency: string | null
+  rating: number | null
+  reviews_count: number | null
+  purchases_count: number | null
+  is_featured: boolean | null
+  is_bestseller: boolean | null
+  is_new: boolean | null
+  tags: string[] | null
   demo_url: string | null
 }
 
-function formatPrice(price: number | null, currency: string): string {
+function formatPrice(price: number | null, currency: string | null): string {
   if (!price) return 'Free'
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
@@ -234,7 +234,7 @@ export default async function ShopPage() {
                           <span
                             key={i}
                             className={`text-sm ${
-                              i < Math.floor(product.rating)
+                              i < Math.floor(product.rating || 0)
                                 ? 'text-yellow-400'
                                 : 'text-gray-300'
                             }`}
@@ -244,7 +244,8 @@ export default async function ShopPage() {
                         ))}
                       </div>
                       <span className='text-sm text-gray-600'>
-                        {product.rating.toFixed(1)} ({product.reviews_count})
+                        {(product.rating || 0).toFixed(1)} (
+                        {product.reviews_count})
                       </span>
                     </div>
 
@@ -363,7 +364,7 @@ export default async function ShopPage() {
                           <div className='flex items-center gap-1 mb-3'>
                             <span className='text-yellow-400'>★</span>
                             <span className='text-sm font-medium text-gray-700'>
-                              {product.rating.toFixed(1)}
+                              {(product.rating || 0).toFixed(1)}
                             </span>
                             <span className='text-sm text-gray-400'>
                               ({product.reviews_count})

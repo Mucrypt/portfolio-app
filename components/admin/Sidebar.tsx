@@ -29,6 +29,10 @@ import {
   Settings,
 } from 'lucide-react'
 
+interface SidebarProps {
+  onClose?: () => void
+}
+
 // Enterprise-grade organized menu structure
 const menuSections = [
   {
@@ -196,7 +200,7 @@ const menuSections = [
   },
 ]
 
-export default function Sidebar() {
+export default function Sidebar({ onClose }: SidebarProps) {
   const pathname = usePathname()
   const [systemInfo, setSystemInfo] = useState({
     uptime: '0s',
@@ -251,19 +255,45 @@ export default function Sidebar() {
   }
 
   return (
-    <aside className='w-80 bg-linear-to-br from-gray-50 via-white to-gray-50 dark:from-zinc-900 dark:via-zinc-900 dark:to-zinc-800 border-r border-gray-200 dark:border-zinc-700 shadow-2xl flex flex-col h-full'>
+    <aside className='w-80 max-w-[85vw] bg-linear-to-br from-gray-50 via-white to-gray-50 dark:from-zinc-900 dark:via-zinc-900 dark:to-zinc-800 border-r border-gray-200 dark:border-zinc-700 shadow-2xl flex flex-col h-full'>
       {/* Header */}
-      <div className='p-6 border-b border-gray-200 dark:border-zinc-700 shrink-0 bg-linear-to-r from-blue-600 to-purple-600'>
-        <div className='flex items-center gap-3 mb-2'>
-          <div className='p-2 bg-white/20 rounded-lg backdrop-blur-sm'>
-            <Zap className='w-6 h-6 text-white' />
+      <div className='p-4 md:p-6 border-b border-gray-200 dark:border-zinc-700 shrink-0 bg-linear-to-r from-blue-600 to-purple-600'>
+        <div className='flex items-center justify-between mb-2'>
+          <div className='flex items-center gap-3'>
+            <div className='p-2 bg-white/20 rounded-lg backdrop-blur-sm'>
+              <Zap className='w-5 h-5 md:w-6 md:h-6 text-white' />
+            </div>
+            <div>
+              <h2 className='text-lg md:text-xl font-bold text-white tracking-tight'>
+                Admin Panel
+              </h2>
+              <p className='text-[10px] md:text-xs text-blue-100'>
+                Portfolio Management
+              </p>
+            </div>
           </div>
-          <div>
-            <h2 className='text-xl font-bold text-white tracking-tight'>
-              Admin Panel
-            </h2>
-            <p className='text-xs text-blue-100'>Portfolio Management</p>
-          </div>
+          {/* Close button for mobile */}
+          {onClose && (
+            <button
+              onClick={onClose}
+              className='lg:hidden p-2 hover:bg-white/10 rounded-lg transition-colors touch-manipulation'
+              aria-label='Close menu'
+            >
+              <svg
+                className='w-5 h-5 text-white'
+                fill='none'
+                stroke='currentColor'
+                viewBox='0 0 24 24'
+              >
+                <path
+                  strokeLinecap='round'
+                  strokeLinejoin='round'
+                  strokeWidth={2}
+                  d='M6 18L18 6M6 6l12 12'
+                />
+              </svg>
+            </button>
+          )}
         </div>
       </div>
 
@@ -309,7 +339,8 @@ export default function Sidebar() {
                       <Link
                         key={item.href}
                         href={item.href}
-                        className={`group flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 ${
+                        onClick={() => onClose?.()} // Close mobile menu on navigation
+                        className={`group flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 touch-manipulation ${
                           isActive
                             ? 'bg-linear-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-blue-600/30 scale-[1.02]'
                             : 'text-gray-700 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800/50 hover:translate-x-1'

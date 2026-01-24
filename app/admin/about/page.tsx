@@ -15,7 +15,7 @@ type AboutPage = {
   cta_primary_href: string | null
   cta_secondary_label: string | null
   cta_secondary_href: string | null
-  is_published: boolean
+  is_published: boolean | null
 }
 
 type AboutSection = {
@@ -24,9 +24,9 @@ type AboutSection = {
   title: string | null
   subtitle: string | null
   content: string
-  kind: string
+  kind: string | null
   sort_order: number
-  is_visible: boolean
+  is_visible: boolean | null
 }
 
 type AboutTimeline = {
@@ -39,7 +39,7 @@ type AboutTimeline = {
   description: string
   icon: string | null
   sort_order: number
-  is_visible: boolean
+  is_visible: boolean | null
 }
 
 type AboutHighlight = {
@@ -50,7 +50,7 @@ type AboutHighlight = {
   description: string
   icon: string | null
   sort_order: number
-  is_visible: boolean
+  is_visible: boolean | null
 }
 
 type AboutQuote = {
@@ -58,9 +58,9 @@ type AboutQuote = {
   owner_user_id: string
   quote: string
   caption: string | null
-  theme: string
+  theme: string | null
   sort_order: number
-  is_visible: boolean
+  is_visible: boolean | null
 }
 
 export default function AdminAboutPage() {
@@ -164,7 +164,7 @@ export default function AdminAboutPage() {
           cta_primary_href: data.cta_primary_href || '/projects',
           cta_secondary_label: data.cta_secondary_label || 'Contact Me',
           cta_secondary_href: data.cta_secondary_href || '/contact',
-          is_published: data.is_published,
+          is_published: data.is_published ?? true,
         })
       }
     } else if (activeTab === 'sections') {
@@ -803,7 +803,7 @@ export default function AdminAboutPage() {
                         description: item.description,
                         icon: item.icon || '',
                         sort_order: item.sort_order,
-                        is_visible: item.is_visible,
+                        is_visible: item.is_visible ?? true,
                       })
                     }}
                     className='px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700'
@@ -978,9 +978,9 @@ export default function AdminAboutPage() {
                           title: section.title || '',
                           subtitle: section.subtitle || '',
                           content: section.content,
-                          kind: section.kind,
+                          kind: section.kind || 'story',
                           sort_order: section.sort_order,
-                          is_visible: section.is_visible,
+                          is_visible: section.is_visible ?? true,
                         })
                       }}
                       className='px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700'
@@ -1174,7 +1174,7 @@ export default function AdminAboutPage() {
                           description: highlight.description,
                           icon: highlight.icon || '',
                           sort_order: highlight.sort_order,
-                          is_visible: highlight.is_visible,
+                          is_visible: highlight.is_visible ?? true,
                         })
                       }}
                       className='px-2 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700'
@@ -1335,9 +1335,9 @@ export default function AdminAboutPage() {
                         setQuoteForm({
                           quote: quote.quote,
                           caption: quote.caption || '',
-                          theme: quote.theme,
+                          theme: quote.theme || 'dark',
                           sort_order: quote.sort_order,
-                          is_visible: quote.is_visible,
+                          is_visible: quote.is_visible ?? true,
                         })
                       }}
                       className='px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700'

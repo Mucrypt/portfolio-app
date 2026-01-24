@@ -47,8 +47,12 @@ export default function CountryStatsWidget() {
     let totalVisits = 0
 
     activities?.forEach((activity) => {
-      const country = activity.activity_data?.country || 'Unknown'
-      const countryCode = activity.activity_data?.country_code || 'XX'
+      const activityData = activity.activity_data as {
+        country?: string
+        country_code?: string
+      } | null
+      const country = activityData?.country || 'Unknown'
+      const countryCode = activityData?.country_code || 'XX'
       const userId = activity.user_id || 'anonymous'
 
       if (!countryMap.has(country)) {
@@ -66,8 +70,20 @@ export default function CountryStatsWidget() {
       .map(([country, data]) => ({
         country,
         country_code:
-          activities?.find((a) => a.activity_data?.country === country)
-            ?.activity_data?.country_code || 'XX',
+          (
+            activities?.find(
+              (a) =>
+                (
+                  a.activity_data as {
+                    country?: string
+                    country_code?: string
+                  } | null
+                )?.country === country,
+            )?.activity_data as {
+              country?: string
+              country_code?: string
+            } | null
+          )?.country_code || 'XX',
         visits: data.visits,
         unique_users: data.users.size,
         percentage: totalVisits > 0 ? (data.visits / totalVisits) * 100 : 0,
@@ -133,19 +149,18 @@ export default function CountryStatsWidget() {
             <div
               key={stat.country}
               className='flex items-center gap-4 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors'
-            >shrink-0
+            >
+              shrink-0
               {/* Rank */}
               <div className='shrink-0 w-6 text-center'>
                 <span className='text-sm font-bold text-gray-400'>
                   {index + 1}
                 </span>
               </div>
-
               {/* Flag */}
               <div className='shrink-0 text-2xl'>
                 {getCountryFlag(stat.country_code)}
               </div>
-
               {/* Country Name */}
               <div className='flex-1 min-w-0'>
                 <div className='font-medium text-gray-900 dark:text-white truncate'>
@@ -156,7 +171,6 @@ export default function CountryStatsWidget() {
                   {stat.unique_users === 1 ? 'user' : 'users'}
                 </div>
               </div>
-
               {/* Stats */}
               <div className='shrink-0 text-right'>
                 <div className='font-bold text-gray-900 dark:text-white'>
@@ -166,7 +180,6 @@ export default function CountryStatsWidget() {
                   {stat.percentage.toFixed(1)}%
                 </div>
               </div>
-
               {/* Progress Bar */}
               <div className='shrink-0 w-16'>
                 <div className='h-2 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden'>

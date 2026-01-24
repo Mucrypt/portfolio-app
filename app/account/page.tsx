@@ -10,13 +10,13 @@ interface PublicUser {
   id: string
   auth_user_id: string
   email: string
-  full_name: string
+  full_name: string | null
   phone: string | null
   avatar_url: string | null
   user_role: string
-  is_active: boolean
-  email_verified: boolean
-  created_at: string
+  is_active: boolean | null
+  email_verified: boolean | null
+  created_at: string | null
   last_login_at: string | null
   preferences: {
     notifications: boolean
@@ -29,8 +29,8 @@ interface ContactInquiry {
   id: string
   subject: string
   message: string
-  status: string
-  created_at: string
+  status: string | null
+  created_at: string | null
   responded_at: string | null
 }
 
@@ -39,8 +39,8 @@ interface ServiceRequest {
   service_type: string
   project_title: string
   description: string
-  status: string
-  created_at: string
+  status: string | null
+  created_at: string | null
 }
 
 type TabType = 'profile' | 'activity' | 'services' | 'contacts' | 'settings'
@@ -89,7 +89,21 @@ export default function AccountPage() {
         return
       }
 
-      setUser(publicUser)
+      // Ensure preferences has a default value
+      const userWithPreferences = {
+        ...publicUser,
+        preferences: (publicUser.preferences as {
+          notifications: boolean
+          marketing_emails: boolean
+          newsletter: boolean
+        }) || {
+          notifications: true,
+          marketing_emails: false,
+          newsletter: false,
+        },
+      }
+
+      setUser(userWithPreferences)
       setEditForm({
         full_name: publicUser.full_name || '',
         phone: publicUser.phone || '',
@@ -196,7 +210,9 @@ export default function AccountPage() {
     { id: 'settings' as TabType, label: 'Settings', icon: '⚙️' },
   ]
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: string | null) => {
+    if (!status) return 'bg-gray-500/20 text-gray-400 border-gray-500/30'
+
     switch (status) {
       case 'new':
       case 'pending':
@@ -273,11 +289,13 @@ export default function AccountPage() {
             <div className='text-right text-sm text-gray-400'>
               <p>Member since</p>
               <p className='text-white font-medium'>
-                {new Date(user.created_at).toLocaleDateString('en-US', {
-                  month: 'short',
-                  day: 'numeric',
-                  year: 'numeric',
-                })}
+                {user.created_at
+                  ? new Date(user.created_at).toLocaleDateString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      year: 'numeric',
+                    })
+                  : 'N/A'}
               </p>
             </div>
           </div>
@@ -438,13 +456,15 @@ export default function AccountPage() {
                     Account Timeline
                   </h3>
                   <div className='space-y-3 text-sm'>
-                    <div className='flex items-center gap-3 text-gray-400'>
-                      <div className='w-2 h-2 rounded-full bg-green-500'></div>
-                      <span>
-                        Account created{' '}
-                        {new Date(user.created_at).toLocaleDateString()}
-                      </span>
-                    </div>
+                    {user.created_at && (
+                      <div className='flex items-center gap-3 text-gray-400'>
+                        <div className='w-2 h-2 rounded-full bg-green-500'></div>
+                        <span>
+                          Account created{' '}
+                          {new Date(user.created_at).toLocaleDateString()}
+                        </span>
+                      </div>
+                    )}
                     {user.email_verified && (
                       <div className='flex items-center gap-3 text-gray-400'>
                         <div className='w-2 h-2 rounded-full bg-blue-500'></div>
@@ -502,10 +522,10 @@ export default function AccountPage() {
                         </h3>
                         <span
                           className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(
-                            service.status,
+                            service.status || 'pending',
                           )}`}
                         >
-                          {service.status}
+                          {service.status || 'pending'}
                         </span>
                       </div>
                       <p className='text-gray-400 text-sm mb-3 line-clamp-2'>
@@ -516,7 +536,9 @@ export default function AccountPage() {
                           {service.service_type.replace('_', ' ')}
                         </span>
                         <span>
-                          {new Date(service.created_at).toLocaleDateString()}
+                          {service.created_at
+                            ? new Date(service.created_at).toLocaleDateString()
+                            : 'N/A'}
                         </span>
                       </div>
                     </div>
@@ -562,10 +584,10 @@ export default function AccountPage() {
                         </h3>
                         <span
                           className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(
-                            inquiry.status,
+                            inquiry.status || 'new',
                           )}`}
                         >
-                          {inquiry.status}
+                          {inquiry.status || 'pending'}
                         </span>
                       </div>
                       <p className='text-gray-400 text-sm mb-3 line-clamp-2'>
@@ -580,7 +602,9 @@ export default function AccountPage() {
                             : 'Awaiting response'}
                         </span>
                         <span>
-                          {new Date(inquiry.created_at).toLocaleDateString()}
+                          {inquiry.created_at
+                            ? new Date(inquiry.created_at).toLocaleDateString()
+                            : 'N/A'}
                         </span>
                       </div>
                     </div>

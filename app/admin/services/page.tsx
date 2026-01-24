@@ -8,73 +8,73 @@ interface Service {
   id: string
   name: string
   slug: string
-  tagline: string
+  tagline: string | null
   description: string
-  full_description: string
-  icon: string
-  color: string
-  featured_image_url: string
-  gallery_images: string[]
+  full_description: string | null
+  icon: string | null
+  color: string | null
+  featured_image_url: string | null
+  gallery_images: string[] | null
   category: string
-  subcategories: string[]
-  service_type: string
-  base_price: number
-  price_currency: string
-  price_unit: string
+  subcategories: string[] | null
+  service_type: string | null
+  base_price: number | null
+  price_currency: string | null
+  price_unit: string | null
   pricing_tiers: any
-  is_price_negotiable: boolean
-  estimated_duration: string
-  duration_unit: string
-  min_duration: number
-  max_duration: number
-  is_available: boolean
-  availability_status: string
-  key_features: string[]
-  deliverables: string[]
-  included_services: string[]
-  excluded_services: string[]
-  requirements: string[]
-  technologies: string[]
-  tools: string[]
-  methodologies: string[]
-  languages: string[]
+  is_price_negotiable: boolean | null
+  estimated_duration: string | null
+  duration_unit: string | null
+  min_duration: number | null
+  max_duration: number | null
+  is_available: boolean | null
+  availability_status: string | null
+  key_features: string[] | null
+  deliverables: string[] | null
+  included_services: string[] | null
+  excluded_services: string[] | null
+  requirements: string[] | null
+  technologies: string[] | null
+  tools: string[] | null
+  methodologies: string[] | null
+  languages: string[] | null
   process_steps: any
-  portfolio_project_ids: string[]
-  case_study_urls: string[]
-  demo_url: string
-  github_repo_url: string
-  sample_work_urls: string[]
+  portfolio_project_ids: string[] | null
+  case_study_urls: string[] | null
+  demo_url: string | null
+  github_repo_url: string | null
+  sample_work_urls: string[] | null
   success_metrics: any
-  typical_results: string[]
+  typical_results: string[] | null
   client_testimonials: any
-  consultation_required: boolean
-  consultation_duration: number
-  communication_channels: string[]
+  consultation_required: boolean | null
+  consultation_duration: number | null
+  communication_channels: string[] | null
   faqs: any
-  booking_url: string
-  calendar_url: string
-  lead_time_days: number
-  max_concurrent_clients: number
-  current_clients: number
-  waitlist_available: boolean
-  meta_title: string
-  meta_description: string
-  meta_keywords: string[]
-  cta_primary_text: string
-  cta_primary_url: string
-  cta_secondary_text: string
-  cta_secondary_url: string
-  views_count: number
-  inquiries_count: number
-  bookings_count: number
-  is_featured: boolean
-  is_popular: boolean
-  is_new: boolean
-  display_order: number
-  is_active: boolean
-  is_accepting_clients: boolean
-  created_at: string
-  updated_at: string
+  booking_url: string | null
+  calendar_url: string | null
+  lead_time_days: number | null
+  max_concurrent_clients: number | null
+  current_clients: number | null
+  waitlist_available: boolean | null
+  meta_title: string | null
+  meta_description: string | null
+  meta_keywords: string[] | null
+  cta_primary_text: string | null
+  cta_primary_url: string | null
+  cta_secondary_text: string | null
+  cta_secondary_url: string | null
+  views_count: number | null
+  inquiries_count: number | null
+  bookings_count: number | null
+  is_featured: boolean | null
+  is_popular: boolean | null
+  is_new: boolean | null
+  display_order: number | null
+  is_active: boolean | null
+  is_accepting_clients: boolean | null
+  created_at: string | null
+  updated_at: string | null
 }
 
 export default function AdminServicesPage() {
@@ -177,7 +177,7 @@ export default function AdminServicesPage() {
       updated_at: undefined,
     }
 
-    const { error } = await supabase.from('services').insert(duplicate)
+    const { error } = await supabase.from('services').insert(duplicate as any)
 
     if (error) {
       alert('Error duplicating service')
@@ -499,7 +499,8 @@ function ServiceCard({
             <div>
               <span className='text-gray-600'>Price:</span>
               <span className='ml-2 font-semibold text-green-600'>
-                ${service.base_price.toLocaleString()} {service.price_unit}
+                ${service.base_price?.toLocaleString() || 0}{' '}
+                {service.price_unit}
               </span>
             </div>
             <div>
@@ -534,7 +535,7 @@ function ServiceCard({
             <div>👁️ {service.views_count} views</div>
             <div>📩 {service.inquiries_count} inquiries</div>
             <div>📅 {service.bookings_count} bookings</div>
-            {service.current_clients > 0 && (
+            {(service.current_clients ?? 0) > 0 && (
               <div>👥 {service.current_clients} current clients</div>
             )}
           </div>
@@ -708,13 +709,15 @@ function ServiceModal({
         // Update
         const { error } = await supabase
           .from('services')
-          .update(formData)
+          .update(formData as any)
           .eq('id', service.id)
 
         if (error) throw error
       } else {
         // Create
-        const { error } = await supabase.from('services').insert(formData)
+        const { error } = await supabase
+          .from('services')
+          .insert(formData as any)
 
         if (error) throw error
       }
@@ -845,7 +848,7 @@ function ServiceModal({
                   </label>
                   <input
                     type='text'
-                    value={formData.tagline}
+                    value={formData.tagline || ''}
                     onChange={(e) => updateField('tagline', e.target.value)}
                     className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500'
                     placeholder='Build Modern, Scalable Web Applications'
@@ -872,7 +875,7 @@ function ServiceModal({
                     Full Description
                   </label>
                   <textarea
-                    value={formData.full_description}
+                    value={formData.full_description || ''}
                     onChange={(e) =>
                       updateField('full_description', e.target.value)
                     }
@@ -890,7 +893,7 @@ function ServiceModal({
                     </label>
                     <input
                       type='text'
-                      value={formData.icon}
+                      value={formData.icon || ''}
                       onChange={(e) => updateField('icon', e.target.value)}
                       className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-3xl text-center'
                       placeholder='💼'
@@ -904,7 +907,7 @@ function ServiceModal({
                     </label>
                     <input
                       type='color'
-                      value={formData.color}
+                      value={formData.color || '#000000'}
                       onChange={(e) => updateField('color', e.target.value)}
                       className='w-full h-10 px-2 py-1 border border-gray-300 rounded-lg'
                     />
@@ -936,7 +939,7 @@ function ServiceModal({
                   </label>
                   <input
                     type='url'
-                    value={formData.featured_image_url}
+                    value={formData.featured_image_url || ''}
                     onChange={(e) =>
                       updateField('featured_image_url', e.target.value)
                     }
@@ -995,7 +998,7 @@ function ServiceModal({
                       Service Type
                     </label>
                     <select
-                      value={formData.service_type}
+                      value={formData.service_type || ''}
                       onChange={(e) =>
                         updateField('service_type', e.target.value)
                       }
@@ -1015,7 +1018,7 @@ function ServiceModal({
                     </label>
                     <input
                       type='number'
-                      value={formData.base_price}
+                      value={formData.base_price ?? ''}
                       onChange={(e) =>
                         updateField('base_price', parseFloat(e.target.value))
                       }
@@ -1031,7 +1034,7 @@ function ServiceModal({
                     </label>
                     <input
                       type='text'
-                      value={formData.price_unit}
+                      value={formData.price_unit || ''}
                       onChange={(e) =>
                         updateField('price_unit', e.target.value)
                       }
@@ -1070,7 +1073,7 @@ function ServiceModal({
                   <label className='flex items-center gap-2'>
                     <input
                       type='checkbox'
-                      checked={formData.is_price_negotiable}
+                      checked={formData.is_price_negotiable || false}
                       onChange={(e) =>
                         updateField('is_price_negotiable', e.target.checked)
                       }
@@ -1090,7 +1093,7 @@ function ServiceModal({
                     </label>
                     <input
                       type='text'
-                      value={formData.estimated_duration}
+                      value={formData.estimated_duration || ''}
                       onChange={(e) =>
                         updateField('estimated_duration', e.target.value)
                       }
@@ -1105,7 +1108,7 @@ function ServiceModal({
                     </label>
                     <input
                       type='number'
-                      value={formData.min_duration}
+                      value={formData.min_duration ?? ''}
                       onChange={(e) =>
                         updateField('min_duration', parseInt(e.target.value))
                       }
@@ -1119,7 +1122,7 @@ function ServiceModal({
                     </label>
                     <input
                       type='number'
-                      value={formData.max_duration}
+                      value={formData.max_duration ?? ''}
                       onChange={(e) =>
                         updateField('max_duration', parseInt(e.target.value))
                       }
@@ -1322,7 +1325,7 @@ function ServiceModal({
                     <label className='flex items-center gap-2 mb-4'>
                       <input
                         type='checkbox'
-                        checked={formData.consultation_required}
+                        checked={formData.consultation_required || false}
                         onChange={(e) =>
                           updateField('consultation_required', e.target.checked)
                         }
@@ -1340,7 +1343,7 @@ function ServiceModal({
                     </label>
                     <input
                       type='number'
-                      value={formData.consultation_duration}
+                      value={formData.consultation_duration ?? ''}
                       onChange={(e) =>
                         updateField(
                           'consultation_duration',
@@ -1400,7 +1403,7 @@ function ServiceModal({
                     </label>
                     <input
                       type='url'
-                      value={formData.demo_url}
+                      value={formData.demo_url || ''}
                       onChange={(e) => updateField('demo_url', e.target.value)}
                       className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500'
                       placeholder='https://demo.example.com'
@@ -1413,7 +1416,7 @@ function ServiceModal({
                     </label>
                     <input
                       type='url'
-                      value={formData.github_repo_url}
+                      value={formData.github_repo_url || ''}
                       onChange={(e) =>
                         updateField('github_repo_url', e.target.value)
                       }
@@ -1471,7 +1474,7 @@ function ServiceModal({
                     </label>
                     <input
                       type='url'
-                      value={formData.booking_url}
+                      value={formData.booking_url || ''}
                       onChange={(e) =>
                         updateField('booking_url', e.target.value)
                       }
@@ -1487,7 +1490,7 @@ function ServiceModal({
                     </label>
                     <input
                       type='url'
-                      value={formData.calendar_url}
+                      value={formData.calendar_url || ''}
                       onChange={(e) =>
                         updateField('calendar_url', e.target.value)
                       }
@@ -1505,7 +1508,7 @@ function ServiceModal({
                     </label>
                     <input
                       type='number'
-                      value={formData.lead_time_days}
+                      value={formData.lead_time_days ?? ''}
                       onChange={(e) =>
                         updateField('lead_time_days', parseInt(e.target.value))
                       }
@@ -1520,7 +1523,7 @@ function ServiceModal({
                     </label>
                     <input
                       type='number'
-                      value={formData.max_concurrent_clients}
+                      value={formData.max_concurrent_clients ?? ''}
                       onChange={(e) =>
                         updateField(
                           'max_concurrent_clients',
@@ -1538,7 +1541,7 @@ function ServiceModal({
                     </label>
                     <input
                       type='number'
-                      value={formData.current_clients}
+                      value={formData.current_clients ?? ''}
                       onChange={(e) =>
                         updateField('current_clients', parseInt(e.target.value))
                       }
@@ -1553,7 +1556,7 @@ function ServiceModal({
                     Availability Status
                   </label>
                   <select
-                    value={formData.availability_status}
+                    value={formData.availability_status || ''}
                     onChange={(e) =>
                       updateField('availability_status', e.target.value)
                     }
@@ -1571,7 +1574,7 @@ function ServiceModal({
                   <label className='flex items-center gap-2'>
                     <input
                       type='checkbox'
-                      checked={formData.waitlist_available}
+                      checked={formData.waitlist_available || false}
                       onChange={(e) =>
                         updateField('waitlist_available', e.target.checked)
                       }
@@ -1595,7 +1598,7 @@ function ServiceModal({
                   </label>
                   <input
                     type='text'
-                    value={formData.meta_title}
+                    value={formData.meta_title || ''}
                     onChange={(e) => updateField('meta_title', e.target.value)}
                     maxLength={60}
                     className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500'
@@ -1612,7 +1615,7 @@ function ServiceModal({
                     Meta Description (160 characters)
                   </label>
                   <textarea
-                    value={formData.meta_description}
+                    value={formData.meta_description || ''}
                     onChange={(e) =>
                       updateField('meta_description', e.target.value)
                     }
@@ -1653,7 +1656,7 @@ function ServiceModal({
                     </label>
                     <input
                       type='text'
-                      value={formData.cta_primary_text}
+                      value={formData.cta_primary_text || ''}
                       onChange={(e) =>
                         updateField('cta_primary_text', e.target.value)
                       }
@@ -1668,7 +1671,7 @@ function ServiceModal({
                     </label>
                     <input
                       type='text'
-                      value={formData.cta_primary_url}
+                      value={formData.cta_primary_url || ''}
                       onChange={(e) =>
                         updateField('cta_primary_url', e.target.value)
                       }
@@ -1683,7 +1686,7 @@ function ServiceModal({
                     </label>
                     <input
                       type='text'
-                      value={formData.cta_secondary_text}
+                      value={formData.cta_secondary_text || ''}
                       onChange={(e) =>
                         updateField('cta_secondary_text', e.target.value)
                       }
@@ -1698,7 +1701,7 @@ function ServiceModal({
                     </label>
                     <input
                       type='text'
-                      value={formData.cta_secondary_url}
+                      value={formData.cta_secondary_url || ''}
                       onChange={(e) =>
                         updateField('cta_secondary_url', e.target.value)
                       }
@@ -1720,7 +1723,7 @@ function ServiceModal({
                   </label>
                   <input
                     type='number'
-                    value={formData.display_order}
+                    value={formData.display_order ?? ''}
                     onChange={(e) =>
                       updateField('display_order', parseInt(e.target.value))
                     }
@@ -1738,7 +1741,7 @@ function ServiceModal({
                     <label className='flex items-center gap-2'>
                       <input
                         type='checkbox'
-                        checked={formData.is_active}
+                        checked={formData.is_active || false}
                         onChange={(e) =>
                           updateField('is_active', e.target.checked)
                         }
@@ -1752,7 +1755,7 @@ function ServiceModal({
                     <label className='flex items-center gap-2'>
                       <input
                         type='checkbox'
-                        checked={formData.is_accepting_clients}
+                        checked={formData.is_accepting_clients || false}
                         onChange={(e) =>
                           updateField('is_accepting_clients', e.target.checked)
                         }
@@ -1766,7 +1769,7 @@ function ServiceModal({
                     <label className='flex items-center gap-2'>
                       <input
                         type='checkbox'
-                        checked={formData.is_featured}
+                        checked={formData.is_featured || false}
                         onChange={(e) =>
                           updateField('is_featured', e.target.checked)
                         }
@@ -1782,7 +1785,7 @@ function ServiceModal({
                     <label className='flex items-center gap-2'>
                       <input
                         type='checkbox'
-                        checked={formData.is_popular}
+                        checked={formData.is_popular || false}
                         onChange={(e) =>
                           updateField('is_popular', e.target.checked)
                         }
@@ -1796,7 +1799,7 @@ function ServiceModal({
                     <label className='flex items-center gap-2'>
                       <input
                         type='checkbox'
-                        checked={formData.is_new}
+                        checked={formData.is_new || false}
                         onChange={(e) =>
                           updateField('is_new', e.target.checked)
                         }
@@ -1808,7 +1811,7 @@ function ServiceModal({
                     <label className='flex items-center gap-2'>
                       <input
                         type='checkbox'
-                        checked={formData.is_available}
+                        checked={formData.is_available || false}
                         onChange={(e) =>
                           updateField('is_available', e.target.checked)
                         }

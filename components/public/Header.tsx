@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/lib/auth/AuthProvider'
 import { signOut } from '@/lib/auth/user'
+import UserDropdown from './UserDropdown'
 
 const navLinks = [
   { href: '/', label: 'Home' },
@@ -20,16 +21,13 @@ export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const { user, isAdmin, loading } = useAuth()
-  const [isSigningOut, setIsSigningOut] = useState(false)
 
   const handleSignOut = async () => {
     try {
-      setIsSigningOut(true)
       await signOut()
       window.location.href = '/'
     } catch (error) {
       console.error('Sign out error:', error)
-      setIsSigningOut(false)
     }
   }
 
@@ -92,57 +90,11 @@ export default function Header() {
           {/* CTA Buttons */}
           <div className='hidden lg:flex items-center gap-3'>
             {!loading && (
-              <>
-                {user ? (
-                  <>
-                    <Link
-                      href={isAdmin ? '/admin' : '/account'}
-                      className='flex items-center gap-3 px-3 py-1.5 rounded-xl bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all'
-                    >
-                      <div className='flex items-center gap-2'>
-                        <div className='w-8 h-8 rounded-full bg-linear-to-r from-blue-600 to-purple-600 flex items-center justify-center'>
-                          <span className='text-sm font-bold text-white'>
-                            {user.email?.charAt(0).toUpperCase()}
-                          </span>
-                        </div>
-                        <span className='text-sm font-semibold text-zinc-700 dark:text-zinc-300'>
-                          {user.email?.split('@')[0]}
-                        </span>
-                      </div>
-                    </Link>
-                    {isAdmin && (
-                      <Link
-                        href='/admin/dashboard'
-                        className='px-4 py-2 rounded-xl font-bold text-sm bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all'
-                      >
-                        Dashboard
-                      </Link>
-                    )}
-                    <button
-                      onClick={handleSignOut}
-                      disabled={isSigningOut}
-                      className='px-4 py-2 rounded-xl font-bold text-sm bg-red-500/10 text-red-600 dark:text-red-400 hover:bg-red-500/20 transition-all disabled:opacity-50'
-                    >
-                      {isSigningOut ? '...' : 'Sign Out'}
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <Link
-                      href='/login'
-                      className='px-4 py-2 rounded-xl font-bold text-sm text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all'
-                    >
-                      Login
-                    </Link>
-                    <Link
-                      href='/signup'
-                      className='px-5 py-2.5 rounded-xl font-bold text-sm bg-linear-to-r from-blue-600 via-purple-600 to-pink-600 text-white hover:shadow-xl transition-all'
-                    >
-                      Sign Up
-                    </Link>
-                  </>
-                )}
-              </>
+              <UserDropdown
+                user={user}
+                isAdmin={isAdmin}
+                onSignOut={handleSignOut}
+              />
             )}
             <Link
               href='/contact'
@@ -212,52 +164,14 @@ export default function Header() {
                 Hire Me
               </Link>
 
-              {/* Mobile Auth Buttons */}
+              {/* Mobile User Menu */}
               {!loading && (
-                <div className='mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-800 space-y-2'>
-                  {user ? (
-                    <>
-                      <div className='px-4 py-2 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-center'>
-                        <span className='text-sm font-semibold text-zinc-700 dark:text-zinc-300'>
-                          {user.email}
-                        </span>
-                      </div>
-                      <Link
-                        href={isAdmin ? '/admin/dashboard' : '/account'}
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        className='block px-4 py-3 rounded-xl font-bold text-center bg-linear-to-r from-blue-600 to-purple-600 text-white'
-                      >
-                        {isAdmin ? '⚡ Admin Dashboard' : '👤 My Account'}
-                      </Link>
-                      <button
-                        onClick={() => {
-                          setIsMobileMenuOpen(false)
-                          handleSignOut()
-                        }}
-                        disabled={isSigningOut}
-                        className='w-full px-4 py-3 rounded-xl font-bold text-center bg-red-500/10 text-red-600 dark:text-red-400 disabled:opacity-50'
-                      >
-                        {isSigningOut ? 'Signing Out...' : 'Sign Out'}
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <Link
-                        href='/login'
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        className='block px-4 py-3 rounded-xl font-bold text-center text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800'
-                      >
-                        Login
-                      </Link>
-                      <Link
-                        href='/signup'
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        className='block px-4 py-3 rounded-xl font-bold text-center bg-linear-to-r from-blue-600 via-purple-600 to-pink-600 text-white'
-                      >
-                        Sign Up
-                      </Link>
-                    </>
-                  )}
+                <div className='mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-800'>
+                  <UserDropdown
+                    user={user}
+                    isAdmin={isAdmin}
+                    onSignOut={handleSignOut}
+                  />
                 </div>
               )}
             </nav>

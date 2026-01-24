@@ -41,7 +41,12 @@ export default function AdminExperiencesPage() {
         .order("start_date", { ascending: false });
 
       if (error) throw error;
-      setExperiences(data || []);
+      setExperiences((data || []).map(exp => ({
+        ...exp,
+        is_current: exp.is_current ?? false,
+        highlights: exp.highlights ?? [],
+        created_at: exp.created_at ?? '',
+      })));
     } catch (error) {
       console.error("Error fetching experiences:", error);
     } finally {

@@ -1,0 +1,42 @@
+# Override values for staging environment
+
+environment: staging
+
+replicaCount: 2
+
+image:
+  tag: "develop"
+
+ingress:
+  host: staging.romeomukulah.org
+  hosts:
+  - host: staging.romeomukulah.org
+    paths:
+    - path: /
+      pathType: Prefix
+  tls:
+    secretName: staging-romeomukulah-tls
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 256Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 2
+  maxReplicas: 5
+
+podDisruptionBudget:
+  enabled: false
+
+env:
+- name: NODE_ENV
+  value: "staging"
+- name: PORT
+  value: "3000"
+- name: NEXT_PUBLIC_SITE_URL
+  value: "https://staging.romeomukulah.org"

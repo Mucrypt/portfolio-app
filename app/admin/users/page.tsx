@@ -26,19 +26,19 @@ interface PublicUser {
   id: string
   auth_user_id: string
   email: string
-  full_name: string
+  full_name: string | null
   phone: string | null
   avatar_url: string | null
   user_role: string
-  is_active: boolean
-  email_verified: boolean
-  created_at: string
+  is_active: boolean | null
+  email_verified: boolean | null
+  created_at: string | null
   last_login_at: string | null
   preferences: {
     notifications: boolean
     marketing_emails: boolean
     newsletter: boolean
-  }
+  } | null
 }
 
 interface UserStats {
@@ -101,8 +101,8 @@ export default function UsersManagementPage() {
 
       if (error) throw error
 
-      setUsers(data || [])
-      calculateStats(data || [])
+      setUsers((data || []) as PublicUser[])
+      calculateStats((data || []) as PublicUser[])
     } catch (error: any) {
       console.error('Error loading users:', error)
       alert('Error loading users: ' + error.message)
@@ -123,11 +123,15 @@ export default function UsersManagementPage() {
       inactive: userList.filter((u) => !u.is_active).length,
       verified: userList.filter((u) => u.email_verified).length,
       unverified: userList.filter((u) => !u.email_verified).length,
-      newToday: userList.filter((u) => new Date(u.created_at) >= today).length,
-      newThisWeek: userList.filter((u) => new Date(u.created_at) >= weekAgo)
-        .length,
-      newThisMonth: userList.filter((u) => new Date(u.created_at) >= monthAgo)
-        .length,
+      newToday: userList.filter(
+        (u) => u.created_at && new Date(u.created_at) >= today,
+      ).length,
+      newThisWeek: userList.filter(
+        (u) => u.created_at && new Date(u.created_at) >= weekAgo,
+      ).length,
+      newThisMonth: userList.filter(
+        (u) => u.created_at && new Date(u.created_at) >= monthAgo,
+      ).length,
     })
   }
 
@@ -359,7 +363,7 @@ export default function UsersManagementPage() {
       user.user_role,
       user.is_active ? 'Active' : 'Inactive',
       user.email_verified ? 'Yes' : 'No',
-      new Date(user.created_at).toLocaleString(),
+      user.created_at ? new Date(user.created_at).toLocaleString() : 'N/A',
       user.last_login_at
         ? new Date(user.last_login_at).toLocaleString()
         : 'Never',
@@ -691,7 +695,9 @@ export default function UsersManagementPage() {
                         </div>
                       </td>
                       <td className='px-4 py-4 text-sm text-gray-600 dark:text-zinc-400'>
-                        {new Date(user.created_at).toLocaleDateString()}
+                        {user.created_at
+                          ? new Date(user.created_at).toLocaleDateString()
+                          : 'N/A'}
                       </td>
                       <td className='px-4 py-4 text-sm text-gray-600 dark:text-zinc-400'>
                         {user.last_login_at
@@ -786,7 +792,9 @@ export default function UsersManagementPage() {
                       Member Since
                     </p>
                     <p className='text-sm font-medium text-gray-900 dark:text-white'>
-                      {new Date(selectedUser.created_at).toLocaleDateString()}
+                      {selectedUser.created_at
+                        ? new Date(selectedUser.created_at).toLocaleDateString()
+                        : 'N/A'}
                     </p>
                   </div>
                   <div className='p-4 bg-gray-50 dark:bg-zinc-900 rounded-lg col-span-2'>
@@ -813,12 +821,12 @@ export default function UsersManagementPage() {
                       </span>
                       <span
                         className={`text-sm font-medium ${
-                          selectedUser.preferences.notifications
+                          selectedUser.preferences?.notifications
                             ? 'text-green-600'
                             : 'text-gray-400'
                         }`}
                       >
-                        {selectedUser.preferences.notifications ? 'On' : 'Off'}
+                        {selectedUser.preferences?.notifications ? 'On' : 'Off'}
                       </span>
                     </div>
                     <div className='flex items-center justify-between p-3 bg-gray-50 dark:bg-zinc-900 rounded-lg'>
@@ -827,12 +835,12 @@ export default function UsersManagementPage() {
                       </span>
                       <span
                         className={`text-sm font-medium ${
-                          selectedUser.preferences.marketing_emails
+                          selectedUser.preferences?.marketing_emails
                             ? 'text-green-600'
                             : 'text-gray-400'
                         }`}
                       >
-                        {selectedUser.preferences.marketing_emails
+                        {selectedUser.preferences?.marketing_emails
                           ? 'On'
                           : 'Off'}
                       </span>
@@ -843,12 +851,12 @@ export default function UsersManagementPage() {
                       </span>
                       <span
                         className={`text-sm font-medium ${
-                          selectedUser.preferences.newsletter
+                          selectedUser.preferences?.newsletter
                             ? 'text-green-600'
                             : 'text-gray-400'
                         }`}
                       >
-                        {selectedUser.preferences.newsletter ? 'On' : 'Off'}
+                        {selectedUser.preferences?.newsletter ? 'On' : 'Off'}
                       </span>
                     </div>
                   </div>
@@ -869,7 +877,10 @@ export default function UsersManagementPage() {
                 )}
                 <button
                   onClick={() =>
-                    toggleUserStatus(selectedUser.id, selectedUser.is_active)
+                    toggleUserStatus(
+                      selectedUser.id,
+                      selectedUser.is_active ?? false,
+                    )
                   }
                   disabled={actionLoading}
                   className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors disabled:opacity-50 ${

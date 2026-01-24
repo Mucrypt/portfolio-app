@@ -6,12 +6,12 @@ export type UserRole = 'admin' | 'user'
 export interface UserProfile {
   id: string
   owner_user_id: string
-  full_name: string
+  full_name: string | null
   email: string | null
   role: UserRole
   avatar_url: string | null
-  created_at?: string
-  updated_at?: string
+  created_at?: string | null
+  updated_at?: string | null
 }
 
 /**
@@ -166,11 +166,11 @@ export async function getCurrentUserProfile(): Promise<UserProfile | null> {
       id: publicProfile.id,
       owner_user_id: publicProfile.auth_user_id,
       full_name: publicProfile.full_name,
-      email: publicProfile.email,
+      email: publicProfile.email || null,
       role: 'user' as UserRole,
       avatar_url: publicProfile.avatar_url,
-      created_at: publicProfile.created_at,
-      updated_at: publicProfile.updated_at,
+      created_at: publicProfile.created_at ?? undefined,
+      updated_at: publicProfile.updated_at ?? undefined,
     }
   }
 
