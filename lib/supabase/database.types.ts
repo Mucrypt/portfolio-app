@@ -604,15 +604,18 @@ export type Database = {
           description: string
           discounted_price: number | null
           duration_hours: number | null
+          gallery_images: string[] | null
           id: string
           instructor_name: string
           is_featured: boolean | null
           is_published: boolean | null
           language: string | null
+          lesson_videos: string[] | null
           level: string | null
           original_price: number | null
           owner_user_id: string
           platform: string
+          promo_video_url: string | null
           rating: number | null
           requirements: string[] | null
           short_description: string | null
@@ -633,15 +636,18 @@ export type Database = {
           description: string
           discounted_price?: number | null
           duration_hours?: number | null
+          gallery_images?: string[] | null
           id?: string
           instructor_name: string
           is_featured?: boolean | null
           is_published?: boolean | null
           language?: string | null
+          lesson_videos?: string[] | null
           level?: string | null
           original_price?: number | null
           owner_user_id: string
           platform: string
+          promo_video_url?: string | null
           rating?: number | null
           requirements?: string[] | null
           short_description?: string | null
@@ -662,15 +668,18 @@ export type Database = {
           description?: string
           discounted_price?: number | null
           duration_hours?: number | null
+          gallery_images?: string[] | null
           id?: string
           instructor_name?: string
           is_featured?: boolean | null
           is_published?: boolean | null
           language?: string | null
+          lesson_videos?: string[] | null
           level?: string | null
           original_price?: number | null
           owner_user_id?: string
           platform?: string
+          promo_video_url?: string | null
           rating?: number | null
           requirements?: string[] | null
           short_description?: string | null
