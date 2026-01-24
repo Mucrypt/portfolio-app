@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import Image from 'next/image'
+import ImageUpload from '@/components/admin/ImageUpload'
 
 interface Service {
   id: string
@@ -934,17 +935,19 @@ function ServiceModal({
 
                 {/* Images */}
                 <div>
-                  <label className='block text-sm font-semibold text-gray-700 mb-2'>
-                    Featured Image URL
-                  </label>
-                  <input
-                    type='url'
-                    value={formData.featured_image_url || ''}
-                    onChange={(e) =>
-                      updateField('featured_image_url', e.target.value)
+                  <ImageUpload
+                    bucket='services'
+                    folder='featured'
+                    prefix='service-featured'
+                    value={formData.featured_image_url}
+                    onChange={(url) =>
+                      updateField('featured_image_url', url as string | null)
                     }
-                    className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500'
-                    placeholder='https://images.unsplash.com/...'
+                    multiple={false}
+                    label='Featured Image'
+                    description='Upload a featured image for your service (recommended: 1200x630px)'
+                    aspectRatio='16/9'
+                    showPreview={true}
                   />
                 </div>
 
@@ -1447,18 +1450,23 @@ function ServiceModal({
 
                 {/* Gallery Images */}
                 <div>
-                  <label className='block text-sm font-semibold text-gray-700 mb-2'>
-                    Gallery Images (one URL per line)
-                  </label>
-                  <textarea
-                    value={formData.gallery_images?.join('\n')}
-                    onChange={(e) =>
-                      updateField('gallery_images', parseArray(e.target.value))
+                  <ImageUpload
+                    bucket='services'
+                    folder='gallery'
+                    prefix='service-gallery'
+                    value={formData.gallery_images}
+                    onChange={(urls) =>
+                      updateField(
+                        'gallery_images',
+                        Array.isArray(urls) ? urls : urls ? [urls] : null,
+                      )
                     }
-                    rows={4}
-                    className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500'
-                    placeholder='https://images.unsplash.com/...'
-                  ></textarea>
+                    multiple={true}
+                    maxFiles={10}
+                    label='Gallery Images'
+                    description='Upload multiple images to showcase your service'
+                    showPreview={true}
+                  />
                 </div>
               </div>
             )}

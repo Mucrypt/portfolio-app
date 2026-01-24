@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import ImageUpload from '@/components/admin/ImageUpload'
 
 type ShopProduct = {
   id: string
@@ -68,7 +69,7 @@ export default function AdminShopPage() {
     category: 'Template',
     subcategory: '',
     thumbnail_url: '',
-    image_urls: '',
+    image_urls: null as string[] | null,
     original_price: 0,
     discounted_price: null as number | null,
     currency: 'USD',
@@ -154,7 +155,7 @@ export default function AdminShopPage() {
       category: 'Template',
       subcategory: '',
       thumbnail_url: '',
-      image_urls: '',
+      image_urls: null,
       original_price: 0,
       discounted_price: null,
       currency: 'USD',
@@ -242,7 +243,7 @@ export default function AdminShopPage() {
         category: formData.category,
         subcategory: formData.subcategory || null,
         thumbnail_url: formData.thumbnail_url,
-        image_urls: parseArray(formData.image_urls),
+        image_urls: formData.image_urls || [],
         original_price: formData.original_price,
         discounted_price: formData.discounted_price,
         currency: formData.currency,
@@ -318,7 +319,7 @@ export default function AdminShopPage() {
       category: product.category,
       subcategory: product.subcategory || '',
       thumbnail_url: product.thumbnail_url,
-      image_urls: (product.image_urls || []).join('\n'),
+      image_urls: product.image_urls,
       original_price: product.original_price,
       discounted_price: product.discounted_price,
       currency: product.currency || 'USD',
@@ -552,30 +553,47 @@ export default function AdminShopPage() {
             </div>
 
             <div className='md:col-span-2'>
-              <label className='block mb-2 font-medium'>Thumbnail URL</label>
-              <input
-                type='text'
+              <ImageUpload
+                bucket='shop'
+                folder='products'
+                prefix='shop-product'
                 value={formData.thumbnail_url}
-                onChange={(e) =>
-                  setFormData({ ...formData, thumbnail_url: e.target.value })
+                onChange={(url) =>
+                  setFormData({
+                    ...formData,
+                    thumbnail_url: url as string,
+                  })
                 }
-                className='w-full p-2 border rounded'
-                placeholder='https://example.com/image.jpg'
+                multiple={false}
+                label='Product Thumbnail'
+                description='Upload a thumbnail image for your product (recommended: 600x600px or 1:1 ratio)'
+                aspectRatio='1/1'
+                showPreview={true}
+                required={true}
               />
             </div>
 
             <div className='md:col-span-2'>
-              <label className='block mb-2 font-medium'>
-                Additional Images (one per line)
-              </label>
-              <textarea
+              <ImageUpload
+                bucket='shop'
+                folder='gallery'
+                prefix='shop-gallery'
                 value={formData.image_urls}
-                onChange={(e) =>
-                  setFormData({ ...formData, image_urls: e.target.value })
+                onChange={(urls) =>
+                  setFormData({
+                    ...formData,
+                    image_urls: Array.isArray(urls)
+                      ? urls
+                      : urls
+                        ? [urls]
+                        : null,
+                  })
                 }
-                rows={3}
-                className='w-full p-2 border rounded'
-                placeholder='https://example.com/image1.jpg&#10;https://example.com/image2.jpg'
+                multiple={true}
+                maxFiles={8}
+                label='Additional Product Images (Gallery)'
+                description='Upload multiple images to showcase your product from different angles'
+                showPreview={true}
               />
             </div>
 

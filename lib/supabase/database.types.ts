@@ -961,45 +961,228 @@ export type Database = {
       }
       projects: {
         Row: {
+          apis_used: string[] | null
+          awards: string[] | null
+          behance_url: string | null
+          budget_range: string | null
+          case_study_url: string | null
+          category: string | null
+          challenges: string[] | null
+          client_industry: string | null
+          client_logo_url: string | null
+          client_name: string | null
+          client_website_url: string | null
+          complexity_level: string | null
+          contribution_percentage: number | null
           created_at: string | null
+          demo_video_url: string | null
           description: string | null
+          display_priority: number | null
+          dribbble_url: string | null
+          duration_months: number | null
+          end_date: string | null
           featured: boolean | null
+          featured_image_url: string | null
+          featured_in: string[] | null
+          figma_url: string | null
+          frameworks: string[] | null
+          gallery_images: string[] | null
+          github_url: string | null
+          hero_video_url: string | null
+          highlights: string[] | null
           id: string
+          is_award_winning: boolean | null
+          is_highlighted: boolean | null
+          is_open_source: boolean | null
+          is_published: boolean | null
+          key_features: string[] | null
+          learnings: string[] | null
+          likes_count: number | null
+          live_url: string | null
+          meta_description: string | null
+          meta_keywords: string[] | null
+          meta_title: string | null
+          og_image_url: string | null
           owner_user_id: string
+          platforms: string[] | null
+          press_coverage: string[] | null
+          primary_language: string | null
+          project_role: string | null
           project_type: string | null
+          published_at: string | null
+          results_metrics: Json | null
+          shares_count: number | null
+          show_in_portfolio: boolean | null
+          slug: string | null
+          solutions: string[] | null
           sort_order: number
+          start_date: string | null
           status: string | null
+          subcategory: string | null
           summary: string | null
+          tagline: string | null
+          tags: string[] | null
+          team_size: number | null
           tech_stack: string[] | null
+          testimonial: string | null
+          testimonial_author: string | null
+          testimonial_avatar_url: string | null
+          testimonial_position: string | null
+          thumbnail_url: string | null
           title: string
+          tools: string[] | null
+          updated_at: string | null
+          views_count: number | null
           year: number | null
         }
         Insert: {
+          apis_used?: string[] | null
+          awards?: string[] | null
+          behance_url?: string | null
+          budget_range?: string | null
+          case_study_url?: string | null
+          category?: string | null
+          challenges?: string[] | null
+          client_industry?: string | null
+          client_logo_url?: string | null
+          client_name?: string | null
+          client_website_url?: string | null
+          complexity_level?: string | null
+          contribution_percentage?: number | null
           created_at?: string | null
+          demo_video_url?: string | null
           description?: string | null
+          display_priority?: number | null
+          dribbble_url?: string | null
+          duration_months?: number | null
+          end_date?: string | null
           featured?: boolean | null
+          featured_image_url?: string | null
+          featured_in?: string[] | null
+          figma_url?: string | null
+          frameworks?: string[] | null
+          gallery_images?: string[] | null
+          github_url?: string | null
+          hero_video_url?: string | null
+          highlights?: string[] | null
           id?: string
+          is_award_winning?: boolean | null
+          is_highlighted?: boolean | null
+          is_open_source?: boolean | null
+          is_published?: boolean | null
+          key_features?: string[] | null
+          learnings?: string[] | null
+          likes_count?: number | null
+          live_url?: string | null
+          meta_description?: string | null
+          meta_keywords?: string[] | null
+          meta_title?: string | null
+          og_image_url?: string | null
           owner_user_id: string
+          platforms?: string[] | null
+          press_coverage?: string[] | null
+          primary_language?: string | null
+          project_role?: string | null
           project_type?: string | null
+          published_at?: string | null
+          results_metrics?: Json | null
+          shares_count?: number | null
+          show_in_portfolio?: boolean | null
+          slug?: string | null
+          solutions?: string[] | null
           sort_order?: number
+          start_date?: string | null
           status?: string | null
+          subcategory?: string | null
           summary?: string | null
+          tagline?: string | null
+          tags?: string[] | null
+          team_size?: number | null
           tech_stack?: string[] | null
+          testimonial?: string | null
+          testimonial_author?: string | null
+          testimonial_avatar_url?: string | null
+          testimonial_position?: string | null
+          thumbnail_url?: string | null
           title: string
+          tools?: string[] | null
+          updated_at?: string | null
+          views_count?: number | null
           year?: number | null
         }
         Update: {
+          apis_used?: string[] | null
+          awards?: string[] | null
+          behance_url?: string | null
+          budget_range?: string | null
+          case_study_url?: string | null
+          category?: string | null
+          challenges?: string[] | null
+          client_industry?: string | null
+          client_logo_url?: string | null
+          client_name?: string | null
+          client_website_url?: string | null
+          complexity_level?: string | null
+          contribution_percentage?: number | null
           created_at?: string | null
+          demo_video_url?: string | null
           description?: string | null
+          display_priority?: number | null
+          dribbble_url?: string | null
+          duration_months?: number | null
+          end_date?: string | null
           featured?: boolean | null
+          featured_image_url?: string | null
+          featured_in?: string[] | null
+          figma_url?: string | null
+          frameworks?: string[] | null
+          gallery_images?: string[] | null
+          github_url?: string | null
+          hero_video_url?: string | null
+          highlights?: string[] | null
           id?: string
+          is_award_winning?: boolean | null
+          is_highlighted?: boolean | null
+          is_open_source?: boolean | null
+          is_published?: boolean | null
+          key_features?: string[] | null
+          learnings?: string[] | null
+          likes_count?: number | null
+          live_url?: string | null
+          meta_description?: string | null
+          meta_keywords?: string[] | null
+          meta_title?: string | null
+          og_image_url?: string | null
           owner_user_id?: string
+          platforms?: string[] | null
+          press_coverage?: string[] | null
+          primary_language?: string | null
+          project_role?: string | null
           project_type?: string | null
+          published_at?: string | null
+          results_metrics?: Json | null
+          shares_count?: number | null
+          show_in_portfolio?: boolean | null
+          slug?: string | null
+          solutions?: string[] | null
           sort_order?: number
+          start_date?: string | null
           status?: string | null
+          subcategory?: string | null
           summary?: string | null
+          tagline?: string | null
+          tags?: string[] | null
+          team_size?: number | null
           tech_stack?: string[] | null
+          testimonial?: string | null
+          testimonial_author?: string | null
+          testimonial_avatar_url?: string | null
+          testimonial_position?: string | null
+          thumbnail_url?: string | null
           title?: string
+          tools?: string[] | null
+          updated_at?: string | null
+          views_count?: number | null
           year?: number | null
         }
         Relationships: []

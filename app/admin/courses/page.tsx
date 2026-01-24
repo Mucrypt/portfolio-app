@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import ImageUpload from '@/components/admin/ImageUpload'
 
 type Course = {
   id: string
@@ -63,7 +64,7 @@ export default function AdminCoursesPage() {
     slug: '',
     short_description: '',
     description: '',
-    thumbnail_url: '',
+    thumbnail_url: '' as string | null,
     instructor_name: '',
     platform: 'Udemy',
     affiliate_link: '',
@@ -494,16 +495,23 @@ export default function AdminCoursesPage() {
                 ))}
               </select>
             </div>
-            <div>
-              <label className='block font-semibold mb-2'>Thumbnail URL</label>
-              <input
-                type='url'
+            <div className='md:col-span-2'>
+              <ImageUpload
+                bucket='courses'
+                folder='thumbnails'
+                prefix='course-thumb'
                 value={formData.thumbnail_url}
-                onChange={(e) =>
-                  setFormData({ ...formData, thumbnail_url: e.target.value })
+                onChange={(url) =>
+                  setFormData({
+                    ...formData,
+                    thumbnail_url: url as string | null,
+                  })
                 }
-                className='w-full px-4 py-2 border rounded dark:bg-zinc-700'
-                placeholder='https://...'
+                multiple={false}
+                label='Course Thumbnail'
+                description='Upload a thumbnail image for your course (recommended: 1200x675px or 16:9 ratio)'
+                aspectRatio='16/9'
+                showPreview={true}
               />
             </div>
           </div>

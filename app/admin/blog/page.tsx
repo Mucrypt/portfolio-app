@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import Image from 'next/image'
+import ImageUpload from '@/components/admin/ImageUpload'
 import {
   Plus,
   Edit,
@@ -722,7 +723,9 @@ export default function AdminBlogPage() {
                           </span>
                           <span className='flex items-center gap-1'>
                             <Calendar className='w-4 h-4' />
-                            {post.created_at ? new Date(post.created_at).toLocaleDateString() : 'N/A'}
+                            {post.created_at
+                              ? new Date(post.created_at).toLocaleDateString()
+                              : 'N/A'}
                           </span>
                         </div>
                       </div>
@@ -942,25 +945,50 @@ export default function AdminBlogPage() {
                   Media
                 </h3>
 
-                <div className='grid md:grid-cols-2 gap-4'>
-                  <div>
-                    <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
-                      Featured Image URL
-                    </label>
-                    <input
-                      type='url'
-                      value={formData.featured_image_url || ''}
-                      onChange={(e) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          featured_image_url: e.target.value,
-                        }))
-                      }
-                      className='w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500'
-                      placeholder='https://example.com/image.jpg'
-                    />
-                  </div>
+                <div className='grid md:grid-cols-1 gap-6'>
+                  {/* Featured Image Upload */}
+                  <ImageUpload
+                    bucket='blog'
+                    folder='featured'
+                    prefix='blog-featured'
+                    value={formData.featured_image_url}
+                    onChange={(url) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        featured_image_url: url as string | null,
+                      }))
+                    }
+                    multiple={false}
+                    label='Featured Image'
+                    description='Upload a featured image for your blog post (recommended: 1200x630px)'
+                    aspectRatio='16/9'
+                    showPreview={true}
+                  />
 
+                  {/* Additional Images Upload */}
+                  <ImageUpload
+                    bucket='blog'
+                    folder='gallery'
+                    prefix='blog-gallery'
+                    value={formData.image_urls}
+                    onChange={(urls) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        image_urls: Array.isArray(urls)
+                          ? urls
+                          : urls
+                            ? [urls]
+                            : null,
+                      }))
+                    }
+                    multiple={true}
+                    maxFiles={10}
+                    label='Additional Images (Gallery)'
+                    description='Upload multiple images for your blog post gallery'
+                    showPreview={true}
+                  />
+
+                  {/* Featured Video URL */}
                   <div>
                     <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
                       Featured Video URL
@@ -978,26 +1006,8 @@ export default function AdminBlogPage() {
                       placeholder='https://youtube.com/watch?v=...'
                     />
                   </div>
-                </div>
 
-                <div className='grid md:grid-cols-2 gap-4'>
-                  <div>
-                    <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
-                      Additional Images (one per line)
-                    </label>
-                    <textarea
-                      value={
-                        Array.isArray(formData.image_urls)
-                          ? formData.image_urls.join('\n')
-                          : ''
-                      }
-                      onChange={(e) => handleImageUrlsChange(e.target.value)}
-                      rows={4}
-                      className='w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 font-mono text-sm'
-                      placeholder='https://example.com/image1.jpg&#10;https://example.com/image2.jpg'
-                    />
-                  </div>
-
+                  {/* Additional Videos */}
                   <div>
                     <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
                       Additional Videos (one per line)
