@@ -775,6 +775,102 @@ export type Database = {
         }
         Relationships: []
       }
+      journey_content: {
+        Row: {
+          core_values: Json | null
+          created_at: string | null
+          cta_button_link: string | null
+          cta_button_text: string | null
+          cta_description: string | null
+          cta_title: string | null
+          fun_facts: Json | null
+          hero_background_image: string | null
+          hero_background_video: string | null
+          hero_subtitle: string | null
+          hero_title: string
+          id: string
+          meta_description: string | null
+          meta_title: string | null
+          milestones: Json | null
+          owner_user_id: string
+          philosophy_statement: string | null
+          photo_gallery: Json | null
+          published: boolean | null
+          show_gallery: boolean | null
+          show_stats: boolean | null
+          show_testimonials: boolean | null
+          show_timeline: boolean | null
+          skills_journey: Json | null
+          social_impact: Json | null
+          story_sections: Json | null
+          testimonials: Json | null
+          updated_at: string | null
+          video_gallery: Json | null
+        }
+        Insert: {
+          core_values?: Json | null
+          created_at?: string | null
+          cta_button_link?: string | null
+          cta_button_text?: string | null
+          cta_description?: string | null
+          cta_title?: string | null
+          fun_facts?: Json | null
+          hero_background_image?: string | null
+          hero_background_video?: string | null
+          hero_subtitle?: string | null
+          hero_title?: string
+          id?: string
+          meta_description?: string | null
+          meta_title?: string | null
+          milestones?: Json | null
+          owner_user_id: string
+          philosophy_statement?: string | null
+          photo_gallery?: Json | null
+          published?: boolean | null
+          show_gallery?: boolean | null
+          show_stats?: boolean | null
+          show_testimonials?: boolean | null
+          show_timeline?: boolean | null
+          skills_journey?: Json | null
+          social_impact?: Json | null
+          story_sections?: Json | null
+          testimonials?: Json | null
+          updated_at?: string | null
+          video_gallery?: Json | null
+        }
+        Update: {
+          core_values?: Json | null
+          created_at?: string | null
+          cta_button_link?: string | null
+          cta_button_text?: string | null
+          cta_description?: string | null
+          cta_title?: string | null
+          fun_facts?: Json | null
+          hero_background_image?: string | null
+          hero_background_video?: string | null
+          hero_subtitle?: string | null
+          hero_title?: string
+          id?: string
+          meta_description?: string | null
+          meta_title?: string | null
+          milestones?: Json | null
+          owner_user_id?: string
+          philosophy_statement?: string | null
+          photo_gallery?: Json | null
+          published?: boolean | null
+          show_gallery?: boolean | null
+          show_stats?: boolean | null
+          show_testimonials?: boolean | null
+          show_timeline?: boolean | null
+          skills_journey?: Json | null
+          social_impact?: Json | null
+          story_sections?: Json | null
+          testimonials?: Json | null
+          updated_at?: string | null
+          video_gallery?: Json | null
+        }
+        Relationships: []
+      }
       languages: {
         Row: {
           id: string
@@ -852,54 +948,96 @@ export type Database = {
       }
       profiles: {
         Row: {
+          achievements: Json | null
           avatar_url: string | null
           bio: string | null
+          call_to_action: Json | null
           cv_url: string | null
           email: string | null
+          featured_quote: string | null
+          featured_quote_author: string | null
           full_name: string
+          fun_facts: Json | null
+          gallery_images: string[] | null
+          gallery_videos: string[] | null
           headline: string | null
+          hero_background_image: string | null
+          hero_video_url: string | null
           id: string
           location: string | null
+          milestones: Json | null
           owner_user_id: string
           phone: string | null
           portfolio_title: string | null
           public_slug: string | null
           role_tags: string[] | null
           socials: Json | null
+          story_sections: Json | null
+          story_subtitle: string | null
+          story_title: string | null
+          testimonials: Json | null
           updated_at: string | null
         }
         Insert: {
+          achievements?: Json | null
           avatar_url?: string | null
           bio?: string | null
+          call_to_action?: Json | null
           cv_url?: string | null
           email?: string | null
+          featured_quote?: string | null
+          featured_quote_author?: string | null
           full_name: string
+          fun_facts?: Json | null
+          gallery_images?: string[] | null
+          gallery_videos?: string[] | null
           headline?: string | null
+          hero_background_image?: string | null
+          hero_video_url?: string | null
           id?: string
           location?: string | null
+          milestones?: Json | null
           owner_user_id: string
           phone?: string | null
           portfolio_title?: string | null
           public_slug?: string | null
           role_tags?: string[] | null
           socials?: Json | null
+          story_sections?: Json | null
+          story_subtitle?: string | null
+          story_title?: string | null
+          testimonials?: Json | null
           updated_at?: string | null
         }
         Update: {
+          achievements?: Json | null
           avatar_url?: string | null
           bio?: string | null
+          call_to_action?: Json | null
           cv_url?: string | null
           email?: string | null
+          featured_quote?: string | null
+          featured_quote_author?: string | null
           full_name?: string
+          fun_facts?: Json | null
+          gallery_images?: string[] | null
+          gallery_videos?: string[] | null
           headline?: string | null
+          hero_background_image?: string | null
+          hero_video_url?: string | null
           id?: string
           location?: string | null
+          milestones?: Json | null
           owner_user_id?: string
           phone?: string | null
           portfolio_title?: string | null
           public_slug?: string | null
           role_tags?: string[] | null
           socials?: Json | null
+          story_sections?: Json | null
+          story_subtitle?: string | null
+          story_title?: string | null
+          testimonials?: Json | null
           updated_at?: string | null
         }
         Relationships: []

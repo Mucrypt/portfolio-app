@@ -10,6 +10,7 @@ import UserDropdown from './UserDropdown'
 const navLinks = [
   { href: '/', label: 'Home' },
   { href: '/about', label: 'About' },
+
   { href: '/projects', label: 'Projects' },
   { href: '/shop', label: 'Shop' },
   { href: '/courses', label: 'Courses' },

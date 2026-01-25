@@ -100,6 +100,12 @@ const menuSections = [
         icon: BookOpen,
         badge: null,
       },
+      {
+        href: '/admin/archives',
+        label: 'Archives',
+        icon: FileText,
+        badge: null,
+      },
     ],
   },
   {
