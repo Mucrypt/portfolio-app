@@ -143,7 +143,7 @@ export default async function AboutPage() {
           .eq('owner_user_id', ownerId)
           .eq('category', 'Software')
           .order('sort_order', { ascending: true })
-          .limit(12)
+          .limit(20)
           .returns<SkillRow[]>()
       : Promise.resolve({ data: [] as SkillRow[], error: null }),
   ])

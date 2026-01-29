@@ -745,10 +745,104 @@ export default function AboutClient({
             subtitle='I build web and mobile products using proven tools — and I care about reliability more than hype.'
           />
 
-          <div className='grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6'>
-            {(techCards.length
-              ? techCards
-              : [
+          {/* Skills with Proficiency Levels */}
+          <div className='space-y-6'>
+            {softwareSkills.length > 0 ? (
+              softwareSkills.map((skill) => {
+                const iconFor = (name: string) => {
+                  const key = name.trim().toLowerCase()
+                  const map: Record<string, string> = {
+                    react: '⚛️',
+                    'next.js': '▲',
+                    next: '▲',
+                    'react native': '📱',
+                    'react native (expo)': '📱',
+                    typescript: '💎',
+                    javascript: '🟡',
+                    node: '🟢',
+                    'node.js': '🟢',
+                    'node.js / express': '🚂',
+                    express: '🚂',
+                    postgresql: '🐘',
+                    postgres: '🐘',
+                    mongodb: '🍃',
+                    redis: '🔴',
+                    supabase: '⚡',
+                    firebase: '🔥',
+                    docker: '🐳',
+                    'git & github': '🐙',
+                    github: '🐙',
+                    git: '📦',
+                    'rest api': '🔌',
+                    rest: '🔌',
+                    graphql: '💜',
+                    jest: '🃏',
+                    python: '🐍',
+                    aws: '☁️',
+                    'google cloud': '☁️',
+                    vercel: '▲',
+                    'github actions': '⚙️',
+                  }
+                  return map[key] ?? '🔧'
+                }
+
+                const levelWidth = `${(skill.level / 5) * 100}%`
+                const levelLabel =
+                  ['Beginner', 'Basic', 'Intermediate', 'Advanced', 'Expert'][
+                    skill.level - 1
+                  ] || 'Intermediate'
+
+                return (
+                  <div
+                    key={skill.id}
+                    className='js-tech group relative overflow-hidden rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white/70 dark:bg-zinc-950/40 backdrop-blur p-6 hover:shadow-xl transition'
+                  >
+                    <div className='absolute inset-0 opacity-0 group-hover:opacity-100 transition duration-500 bg-linear-to-br from-blue-500/5 via-purple-500/5 to-pink-500/5' />
+                    <div className='relative'>
+                      <div className='flex items-center justify-between mb-3'>
+                        <div className='flex items-center gap-3'>
+                          <span className='text-3xl'>
+                            {iconFor(skill.name)}
+                          </span>
+                          <div>
+                            <h3 className='font-black text-zinc-900 dark:text-white text-lg'>
+                              {skill.name}
+                            </h3>
+                            <p className='text-xs text-zinc-500 dark:text-zinc-400 font-semibold'>
+                              {levelLabel}
+                            </p>
+                          </div>
+                        </div>
+                        <div className='flex gap-1'>
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <svg
+                              key={star}
+                              className={`w-5 h-5 ${
+                                star <= skill.level
+                                  ? 'text-yellow-400 fill-yellow-400'
+                                  : 'text-zinc-300 dark:text-zinc-600'
+                              }`}
+                              fill='currentColor'
+                              viewBox='0 0 20 20'
+                            >
+                              <path d='M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z' />
+                            </svg>
+                          ))}
+                        </div>
+                      </div>
+                      <div className='relative h-2 bg-zinc-200 dark:bg-zinc-700 rounded-full overflow-hidden'>
+                        <div
+                          className='absolute inset-y-0 left-0 bg-linear-to-r from-blue-500 via-purple-500 to-pink-500 rounded-full transition-all duration-1000'
+                          style={{ width: levelWidth }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )
+              })
+            ) : (
+              <div className='grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6'>
+                {[
                   { id: 't1', name: 'React & Next.js', icon: '⚛️' },
                   { id: 't2', name: 'React Native', icon: '📱' },
                   { id: 't3', name: 'TypeScript', icon: '💎' },
@@ -757,21 +851,22 @@ export default function AboutClient({
                   { id: 't6', name: 'MongoDB', icon: '🍃' },
                   { id: 't7', name: 'Supabase', icon: '⚡' },
                   { id: 't8', name: 'Cloud (Basics)', icon: '☁️' },
-                ]
-            ).map((tech) => (
-              <div
-                key={tech.id}
-                className='js-tech group relative overflow-hidden rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white/70 dark:bg-zinc-950/40 backdrop-blur p-5 hover:shadow-xl transition'
-              >
-                <div className='absolute inset-0 opacity-0 group-hover:opacity-100 transition duration-500 bg-linear-to-br from-blue-500/8 via-purple-500/8 to-pink-500/8' />
-                <div className='relative flex items-center gap-3'>
-                  <div className='text-3xl'>{tech.icon}</div>
-                  <div className='font-black text-zinc-900 dark:text-white'>
-                    {tech.name}
+                ].map((tech) => (
+                  <div
+                    key={tech.id}
+                    className='js-tech group relative overflow-hidden rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white/70 dark:bg-zinc-950/40 backdrop-blur p-5 hover:shadow-xl transition'
+                  >
+                    <div className='absolute inset-0 opacity-0 group-hover:opacity-100 transition duration-500 bg-linear-to-br from-blue-500/8 via-purple-500/8 to-pink-500/8' />
+                    <div className='relative flex items-center gap-3'>
+                      <div className='text-3xl'>{tech.icon}</div>
+                      <div className='font-black text-zinc-900 dark:text-white'>
+                        {tech.name}
+                      </div>
+                    </div>
                   </div>
-                </div>
+                ))}
               </div>
-            ))}
+            )}
           </div>
         </section>
 
