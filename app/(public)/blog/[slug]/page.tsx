@@ -196,7 +196,7 @@ export default async function BlogPostPage({
   const replies = comments.filter((c) => c.parent_comment_id)
 
   return (
-    <div className='min-h-screen bg-gray-50 dark:bg-gray-900'>
+    <div className='min-h-screen bg-gray-50 dark:bg-gray-900 overflow-x-hidden'>
       {/* Track blog post view */}
       <BlogPostTracker
         postId={post.id}
@@ -258,7 +258,7 @@ export default async function BlogPostPage({
         </div>
       )}
 
-      <div className='container mx-auto px-3 sm:px-4 py-4 sm:py-6 md:py-8 lg:py-12'>
+      <div className='container mx-auto px-4 sm:px-4 py-4 sm:py-6 md:py-8 lg:py-12 max-w-full'>
         <div className='grid lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6 lg:gap-8'>
           {/* Main Content */}
           <div className='lg:col-span-2'>
@@ -352,7 +352,7 @@ export default async function BlogPostPage({
 
                   {/* Engagement Stats */}
                   <div className='flex items-center gap-2.5 sm:gap-3 md:gap-4 lg:gap-6 text-xs sm:text-sm text-gray-600 dark:text-gray-400'>
-                    <button className='flex items-center gap-1 hover:text-red-600 transition-colors min-h-11min-h-0 -my-2 sm:my-0'>
+                    <button className='flex items-center gap-1 hover:text-red-600 transition-colors min-h-11 sm:min-h-0 -my-2 sm:my-0'>
                       <Heart className='w-4 h-4 sm:w-4.5 sm:h-4.5 md:w-5 md:h-5' />
                       <span>{post.likes_count}</span>
                     </button>
@@ -407,7 +407,7 @@ export default async function BlogPostPage({
 
               {/* Article Content */}
               <div className='p-3 sm:p-4 md:p-6 lg:p-8'>
-                <div className='prose prose-sm sm:prose-base lg:prose-lg dark:prose-invert max-w-none prose-headings:font-bold prose-h1:text-xl sm:prose-h1:text-2xl md:prose-h1:text-3xl lg:prose-h1:text-4xl prose-h2:text-lg sm:prose-h2:text-xl md:prose-h2:text-2xl lg:prose-h2:text-3xl prose-h3:text-base sm:prose-h3:text-lg md:prose-h3:text-xl lg:prose-h3:text-2xl prose-p:text-sm sm:prose-p:text-base prose-p:text-gray-700 dark:prose-p:text-gray-300 prose-p:leading-relaxed prose-a:text-blue-600 dark:prose-a:text-blue-400 prose-code:text-pink-600 dark:prose-code:text-pink-400 prose-code:bg-gray-100 dark:prose-code:bg-gray-800 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:text-xs sm:prose-code:text-sm prose-pre:bg-gray-900 prose-pre:text-gray-100 prose-pre:text-xs sm:prose-pre:text-sm prose-pre:overflow-x-auto prose-blockquote:border-l-4 prose-blockquote:border-blue-600 prose-blockquote:pl-3 sm:prose-blockquote:pl-4 prose-blockquote:italic prose-img:rounded-lg prose-img:shadow-lg prose-ul:text-sm sm:prose-ul:text-base prose-ol:text-sm sm:prose-ol:text-base'>
+                <div className='prose prose-sm sm:prose-base lg:prose-lg dark:prose-invert max-w-none wrap-break-word prose-headings:font-bold prose-h1:text-xl sm:prose-h1:text-2xl md:prose-h1:text-3xl lg:prose-h1:text-4xl prose-h2:text-lg sm:prose-h2:text-xl md:prose-h2:text-2xl lg:prose-h2:text-3xl prose-h3:text-base sm:prose-h3:text-lg md:prose-h3:text-xl lg:prose-h3:text-2xl prose-p:text-sm sm:prose-p:text-base prose-p:text-gray-700 dark:prose-p:text-gray-300 prose-p:leading-relaxed prose-a:text-blue-600 dark:prose-a:text-blue-400 prose-a:break-words prose-code:text-pink-600 dark:prose-code:text-pink-400 prose-code:bg-gray-100 dark:prose-code:bg-gray-800 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:text-xs sm:prose-code:text-sm prose-code:break-words prose-pre:bg-gray-900 prose-pre:text-gray-100 prose-pre:text-xs sm:prose-pre:text-sm prose-pre:overflow-x-auto prose-pre:max-w-full prose-blockquote:border-l-4 prose-blockquote:border-blue-600 prose-blockquote:pl-3 sm:prose-blockquote:pl-4 prose-blockquote:italic prose-img:rounded-lg prose-img:shadow-lg prose-img:max-w-full prose-ul:text-sm sm:prose-ul:text-base prose-ol:text-sm sm:prose-ol:text-base'>
                   {post.content_format === 'markdown' ? (
                     <ReactMarkdown
                       remarkPlugins={[remarkGfm]}

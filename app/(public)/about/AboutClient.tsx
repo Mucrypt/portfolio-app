@@ -354,25 +354,91 @@ export default function AboutClient({
 
   // tech stack from skills (software category)
   const techCards = useMemo(() => {
-    const list = softwareSkills.slice(0, 12)
-    // emoji mapping (feel free to adjust)
+    // Deduplicate skills by name (case-insensitive)
+    const seen = new Set<string>()
+    const uniqueSkills = softwareSkills.filter((s) => {
+      const key = s.name.toLowerCase().trim()
+      if (seen.has(key)) return false
+      seen.add(key)
+      return true
+    })
+
+    const list = uniqueSkills.slice(0, 16)
+
+    // Comprehensive emoji mapping for production-ready tech stack
     const map: Record<string, string> = {
+      // Frontend
       react: '⚛️',
-      'next.js': '⚛️',
-      next: '⚛️',
+      'next.js': '▲',
+      next: '▲',
       'react native': '📱',
       typescript: '💎',
+      javascript: '🟡',
+      vue: '💚',
+      angular: '🅰️',
+
+      // Backend
       node: '🟢',
       'node.js': '🟢',
+      express: '🚂',
+      nestjs: '🐈',
+      python: '🐍',
+      django: '🎸',
+      flask: '🧪',
+
+      // Databases
       postgresql: '🐘',
       postgres: '🐘',
       mongodb: '🍃',
-      supabase: '⚡',
-      aws: '☁️',
-      'google cloud': '☁️',
       mysql: '🐬',
-      python: '🐍',
-      javascript: '🟡',
+      redis: '🔴',
+
+      // Cloud & Infrastructure
+      aws: '☁️',
+      'amazon web services': '☁️',
+      'google cloud': '☁️',
+      gcp: '☁️',
+      azure: '☁️',
+      vercel: '▲',
+      netlify: '💠',
+      heroku: '💜',
+
+      // DevOps & CI/CD
+      docker: '🐳',
+      kubernetes: '⚓',
+      k8s: '⚓',
+      'github actions': '⚙️',
+      gitlab: '🦊',
+      jenkins: '🔧',
+      'ci/cd': '🔄',
+      terraform: '🏗️',
+
+      // Backend as a Service
+      supabase: '⚡',
+      firebase: '🔥',
+
+      // Testing & Quality
+      jest: '🃏',
+      cypress: '🌲',
+      playwright: '🎭',
+      testing: '✅',
+      'unit testing': '✅',
+
+      // Security & Monitoring
+      sentry: '🚨',
+      datadog: '🐕',
+      grafana: '📊',
+      security: '🔒',
+
+      // Tools & Others
+      git: '📦',
+      github: '🐙',
+      vscode: '💻',
+      linux: '🐧',
+      nginx: '🟩',
+      graphql: '💜',
+      rest: '🔌',
+      'rest api': '🔌',
     }
 
     const iconFor = (name: string) => {

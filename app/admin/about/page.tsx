@@ -466,7 +466,7 @@ export default function AdminAboutPage() {
                 setPageForm({ ...pageForm, hero_eyebrow: e.target.value })
               }
               className='w-full px-4 py-2 border rounded dark:bg-zinc-800'
-              placeholder='🌍 Cameroon → Algeria → Italy → Software'
+              placeholder='⚡ Full-Stack Developer | Self-Taught & Driven'
             />
           </div>
           <div>
