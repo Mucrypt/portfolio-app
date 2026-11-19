@@ -40,9 +40,12 @@ export default async function ProjectsPage() {
     new Set(projects?.map((p) => p.category).filter(Boolean)),
   )
 
-  // Get award-winning projects
-  const awardWinningProjects =
-    projects?.filter((p) => p.is_award_winning && p.is_published) || []
+  // Only real, non-zero numbers are shown — no empty or vanity stat cards.
+  const stats = [
+    { label: 'Projects', value: projects?.length || 0, color: 'text-blue-600 dark:text-blue-400' },
+    { label: 'Featured', value: featuredProjects.length, color: 'text-purple-600 dark:text-purple-400' },
+    { label: 'Categories', value: categories.length, color: 'text-green-600 dark:text-green-400' },
+  ].filter((s) => s.value > 0)
 
   return (
     <div className='min-h-screen bg-linear-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-950'>
@@ -62,40 +65,23 @@ export default async function ProjectsPage() {
           </p>
 
           {/* Stats Bar */}
-          <div className='mt-10 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto'>
-            <div className='bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg border border-gray-200 dark:border-gray-700'>
-              <div className='text-3xl font-bold text-blue-600 dark:text-blue-400'>
-                {projects?.length || 0}
-              </div>
-              <div className='text-sm text-gray-600 dark:text-gray-400 mt-1'>
-                Total Projects
-              </div>
+          {stats.length > 0 && (
+            <div className='mt-10 flex flex-wrap justify-center gap-4 max-w-4xl mx-auto'>
+              {stats.map((s) => (
+                <div
+                  key={s.label}
+                  className='min-w-36 bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg border border-gray-200 dark:border-gray-700'
+                >
+                  <div className={`text-3xl font-bold ${s.color}`}>
+                    {s.value}
+                  </div>
+                  <div className='text-sm text-gray-600 dark:text-gray-400 mt-1'>
+                    {s.label}
+                  </div>
+                </div>
+              ))}
             </div>
-            <div className='bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg border border-gray-200 dark:border-gray-700'>
-              <div className='text-3xl font-bold text-purple-600 dark:text-purple-400'>
-                {featuredProjects.length}
-              </div>
-              <div className='text-sm text-gray-600 dark:text-gray-400 mt-1'>
-                Featured
-              </div>
-            </div>
-            <div className='bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg border border-gray-200 dark:border-gray-700'>
-              <div className='text-3xl font-bold text-yellow-600 dark:text-yellow-400'>
-                {awardWinningProjects.length}
-              </div>
-              <div className='text-sm text-gray-600 dark:text-gray-400 mt-1'>
-                Award-Winning
-              </div>
-            </div>
-            <div className='bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg border border-gray-200 dark:border-gray-700'>
-              <div className='text-3xl font-bold text-green-600 dark:text-green-400'>
-                {categories.length}
-              </div>
-              <div className='text-sm text-gray-600 dark:text-gray-400 mt-1'>
-                Categories
-              </div>
-            </div>
-          </div>
+          )}
         </div>
 
         {/* Featured Projects Section */}

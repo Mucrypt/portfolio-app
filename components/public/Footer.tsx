@@ -15,16 +15,12 @@ const footerLinks = {
     { href: '/services/training', label: 'Training' },
   ],
   shop: [
-    { href: '/shop', label: 'All Products' },
-    { href: '/shop/templates', label: 'Templates' },
-    { href: '/shop/components', label: 'Components' },
-    { href: '/shop/tools', label: 'Tools' },
+    { href: '/products', label: 'All Products' },
+    { href: '/products/squad-streaks', label: 'Squad Streaks' },
   ],
   learning: [
     { href: '/courses', label: 'All Courses' },
-    { href: '/courses/react', label: 'React Mastery' },
-    { href: '/courses/nextjs', label: 'Next.js Pro' },
-    { href: '/blog', label: 'Blog' },
+    { href: '/courses/squad-streaks', label: 'Squad Streaks course' },
   ],
 }
 

@@ -3,7 +3,6 @@ import {
   ArrowRight,
   Code2,
   Briefcase,
-  BookOpen,
   ShoppingCart,
   GraduationCap,
   Mail,
@@ -117,23 +116,6 @@ export default async function LandingPage() {
               </Link>
 
               <Link
-                href='/blog'
-                className='group p-8 bg-linear-to-br from-purple-500/10 to-purple-600/10 rounded-xl border border-purple-500/20 hover:border-purple-500/50 hover:from-purple-500/20 hover:to-purple-600/20 transition-all transform hover:scale-105'
-              >
-                <div className='mb-4 p-3 bg-purple-500/20 rounded-lg w-fit group-hover:bg-purple-500/30 transition-colors'>
-                  <BookOpen className='w-8 h-8 text-purple-400' />
-                </div>
-                <h3 className='text-2xl font-bold mb-3 text-white'>Blog</h3>
-                <p className='text-gray-400 mb-4'>
-                  Read my latest articles on web development, cloud
-                  architecture, and tech insights.
-                </p>
-                <span className='text-purple-400 font-medium flex items-center gap-2 group-hover:gap-3 transition-all'>
-                  Read Articles <ArrowRight className='w-4 h-4' />
-                </span>
-              </Link>
-
-              <Link
                 href='/courses'
                 className='group p-8 bg-linear-to-br from-green-500/10 to-green-600/10 rounded-xl border border-green-500/20 hover:border-green-500/50 hover:from-green-500/20 hover:to-green-600/20 transition-all transform hover:scale-105'
               >
@@ -142,8 +124,8 @@ export default async function LandingPage() {
                 </div>
                 <h3 className='text-2xl font-bold mb-3 text-white'>Courses</h3>
                 <p className='text-gray-400 mb-4'>
-                  Learn from my curated courses on modern web development and
-                  cloud technologies.
+                  Free video courses: real apps built from an empty folder to
+                  production, every line explained.
                 </p>
                 <span className='text-green-400 font-medium flex items-center gap-2 group-hover:gap-3 transition-all'>
                   Browse Courses <ArrowRight className='w-4 h-4' />
@@ -168,19 +150,19 @@ export default async function LandingPage() {
               </Link>
 
               <Link
-                href='/shop'
+                href='/products'
                 className='group p-8 bg-linear-to-br from-pink-500/10 to-pink-600/10 rounded-xl border border-pink-500/20 hover:border-pink-500/50 hover:from-pink-500/20 hover:to-pink-600/20 transition-all transform hover:scale-105'
               >
                 <div className='mb-4 p-3 bg-pink-500/20 rounded-lg w-fit group-hover:bg-pink-500/30 transition-colors'>
                   <ShoppingCart className='w-8 h-8 text-pink-400' />
                 </div>
-                <h3 className='text-2xl font-bold mb-3 text-white'>Shop</h3>
+                <h3 className='text-2xl font-bold mb-3 text-white'>Products</h3>
                 <p className='text-gray-400 mb-4'>
-                  Browse digital products, templates, and resources for
-                  developers.
+                  Real apps and tools you can try live, with the full source
+                  code of each one.
                 </p>
                 <span className='text-pink-400 font-medium flex items-center gap-2 group-hover:gap-3 transition-all'>
-                  Visit Shop <ArrowRight className='w-4 h-4' />
+                  See Products <ArrowRight className='w-4 h-4' />
                 </span>
               </Link>
 

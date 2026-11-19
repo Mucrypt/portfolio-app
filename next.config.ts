@@ -35,10 +35,24 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'player.vimeo.com',
       },
+      {
+        // YouTube lesson thumbnails (derived from video_ref)
+        protocol: 'https',
+        hostname: 'i.ytimg.com',
+      },
     ],
     dangerouslyAllowSVG: true,
     contentDispositionType: 'attachment',
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
+  },
+
+  // The old affiliate /shop is retired; products live in the catalog now.
+  // (/blog stays reachable but is hidden from navigation until real posts exist.)
+  async redirects() {
+    return [
+      { source: '/shop', destination: '/products', permanent: false },
+      { source: '/shop/:path*', destination: '/products', permanent: false },
+    ]
   },
 
   // Security headers

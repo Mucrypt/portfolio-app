@@ -87,8 +87,10 @@ type Profile = {
   headline: string | null
   bio: string | null
   location: string | null
-  email: string | null
-  phone: string | null
+  // Never provided on public pages: the public_profiles view excludes email/phone,
+  // so the contact blocks below don't render. Kept optional for the shared markup.
+  email?: string | null
+  phone?: string | null
   avatar_url: string | null
   cv_url: string | null
   hero_video_url: string | null
@@ -187,8 +189,9 @@ export default function ArchivesPage() {
         const supabase = createClient()
 
         // Pick the most recently updated profile (avoids `.single()` breaking if multiple profiles exist).
+        // Public pages read the `public_profiles` view (no email/phone); `profiles` is owner-only.
         const profileRes = await supabase
-          .from('profiles')
+          .from('public_profiles')
           .select('*')
           .order('updated_at', { ascending: false })
           .limit(1)

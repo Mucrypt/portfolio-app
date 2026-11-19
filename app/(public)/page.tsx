@@ -55,8 +55,9 @@ function SectionTitle({
 export default async function HomePage() {
   const supabase = await createClient()
 
+  // Public pages read the `public_profiles` view (no email/phone); `profiles` is owner-only.
   const { data: profile } = await supabase
-    .from('profiles')
+    .from('public_profiles')
     .select('*')
     .single<Profile>()
 

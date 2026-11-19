@@ -60,15 +60,16 @@ function calculateDiscount(
 export default async function ProductDetailPage({
   params,
 }: {
-  params: { slug: string }
+  params: Promise<{ slug: string }>
 }) {
+  const { slug } = await params
   const supabase = await createClient()
 
   // Fetch the product
   const { data: product } = await supabase
     .from('shop_products')
     .select('*')
-    .eq('slug', params.slug)
+    .eq('slug', slug)
     .eq('is_published', true)
     .maybeSingle()
 

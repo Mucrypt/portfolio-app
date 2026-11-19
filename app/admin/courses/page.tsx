@@ -142,7 +142,7 @@ export default function AdminCoursesPage() {
     if (!user) return
 
     const { data } = await supabase
-      .from('courses')
+      .from('affiliate_courses')
       .select('*')
       .eq('owner_user_id', user.id)
       .order('sort_order', { ascending: true })
@@ -236,10 +236,10 @@ export default function AdminCoursesPage() {
 
     const { error } = editingCourse
       ? await supabase
-          .from('courses')
+          .from('affiliate_courses')
           .update(courseData)
           .eq('id', editingCourse.id)
-      : await supabase.from('courses').insert(courseData)
+      : await supabase.from('affiliate_courses').insert(courseData)
 
     if (error) {
       setMessage({ type: 'error', text: `Error: ${error.message}` })
@@ -259,7 +259,7 @@ export default function AdminCoursesPage() {
 
   async function deleteCourse(id: string) {
     if (!confirm('Are you sure you want to delete this course?')) return
-    const { error } = await supabase.from('courses').delete().eq('id', id)
+    const { error } = await supabase.from('affiliate_courses').delete().eq('id', id)
     if (!error) {
       setMessage({ type: 'success', text: 'Course deleted successfully!' })
       loadCourses()
@@ -362,10 +362,11 @@ export default function AdminCoursesPage() {
       <div className='mb-8'>
         <h1 className='text-3xl md:text-4xl font-bold mb-2 flex items-center gap-3'>
           <BookOpen className='w-8 h-8 md:w-10 md:h-10 text-blue-600' />
-          Course Management
+          Affiliate Courses (retired)
         </h1>
         <p className='text-gray-600 dark:text-gray-400'>
-          Manage your courses like a pro with videos, images, and more
+          Old affiliate listings, kept for history and unpublished. Your own courses
+          arrive from ytfactory through the ingest API and appear on /courses.
         </p>
       </div>
 

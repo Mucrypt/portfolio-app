@@ -290,7 +290,7 @@ export default function UserDropdown({
             </Link>
 
             <Link
-              href='/shop'
+              href='/products'
               onClick={() => setIsOpen(false)}
               className='flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all touch-manipulation'
             >

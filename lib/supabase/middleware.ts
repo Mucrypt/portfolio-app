@@ -38,7 +38,7 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser()
 
   // Define routes that require authentication
-  const protectedPublicRoutes = ['/contact', '/shop']
+  const protectedPublicRoutes = ['/contact']
   const isProtectedRoute = protectedPublicRoutes.some((route) =>
     request.nextUrl.pathname.startsWith(route),
   )

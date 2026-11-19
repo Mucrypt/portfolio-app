@@ -62,3 +62,7 @@ terraform/.terraform/
 
 # Supabase
 .supabase
+
+# Supabase CLI local state (link info, versions)
+supabase/.temp/
+supabase/.branches/
