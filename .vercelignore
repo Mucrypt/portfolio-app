@@ -1,3 +1,9 @@
+# Never upload local secrets (when this file exists, Vercel ignores .gitignore)
+.env*
+!.env.example
+supabase/.temp/
+*.tsbuildinfo
+
 # Keep AWS scripts for reference
 # These are archived but not deleted in case you need them
 *.tf
