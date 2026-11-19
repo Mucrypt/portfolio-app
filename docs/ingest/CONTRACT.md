@@ -1,6 +1,8 @@
-# Course Ingest API — Contract v0.1 (draft)
+# Course Ingest API — Contract v0.2
 
-Status: **designed, not implemented yet.** These endpoints don't exist on romeomukulah.org until phase 3 ships.
+Status: **implemented** (`app/api/ingest/*`, database functions in
+`supabase/migrations/20261119140000_ingest_api.sql`). Live once that migration is applied and
+`INGEST_TOKEN` + `SUPABASE_SERVICE_ROLE_KEY` are set in the site's env.
 This file is the agreement between ytfactory (sender) and portfolio-app (receiver). Change it here first,
 then in code.
 
@@ -249,10 +251,11 @@ All errors look like this:
 | 401 | `unauthorized` | Missing or wrong token. Same response for both, no detail. |
 | 404 | `course_not_found` / `lesson_not_found` / `product_not_found` | The GET or PATCH target doesn't exist. |
 | 409 | `lesson_belongs_to_other_course` | `external_id` clash across courses. |
+| 409 | `slug_taken` | The course `slug` is used by another course, or a new lesson's `slug` is used by another lesson in the same course. |
 | 413 | `payload_too_large` | Over 1 MB (JSON) or 4 MB (asset). |
 | 415 | `unsupported_media_type` | Wrong Content-Type, or an asset that isn't PNG/JPEG/WebP. |
 | 422 | `unknown_product` / `unknown_module` / `publish_requires_video_ref` | The request is well-formed but conflicts with what's in the DB. |
-| 429 | `rate_limited` | More than 60 requests a minute. Back off. |
+| 429 | `rate_limited` | More than 60 requests a minute. Back off; the `Retry-After` header gives the seconds until the window resets. |
 | 500 | `internal_error` | Safe to retry. |
 
 ---
@@ -279,6 +282,13 @@ Not carried in v0.1, but can be added later without breaking anything: tags, pre
 ---
 
 ## 7. Changelog
+
+- **v0.2 (2026-11-19):** implemented. Additive only, nothing changes for an existing sender:
+  - New `409 slug_taken` (a slug clash previously had no defined error).
+  - `429` responses carry a `Retry-After` header.
+  - Clarified: `modules[].title` and `modules[].sort_order` are required; `course.thumbnail_url` must start with
+    the `course-thumbnails` public URL returned by `/assets`; chapters must be sorted by `start`.
+  - Error responses on a `?dry_run=1` call also carry `"dry_run": true` (except `401`).
 
 - **v0.1 (2026-11-19):** first draft, agreed with ytfactory-24 in the Squad Streaks planning thread. Before any
   implementation, ytfactory's change requests were folded in: lesson `transcript` and `short_ref`,

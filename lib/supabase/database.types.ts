@@ -950,6 +950,24 @@ export type Database = {
         }
         Relationships: []
       }
+      ingest_rate_windows: {
+        Row: {
+          bucket: string
+          hits: number
+          window_start: string
+        }
+        Insert: {
+          bucket: string
+          hits?: number
+          window_start: string
+        }
+        Update: {
+          bucket?: string
+          hits?: number
+          window_start?: string
+        }
+        Relationships: []
+      }
       journey_content: {
         Row: {
           core_values: Json | null
@@ -2675,6 +2693,20 @@ export type Database = {
         }
       }
       get_user_type: { Args: never; Returns: string }
+      ingest_get_course: { Args: { p_external_id: string }; Returns: Json }
+      ingest_patch_lesson: {
+        Args: { p_dry_run?: boolean; p_external_id: string; p_patch: Json }
+        Returns: Json
+      }
+      ingest_rate_hit: { Args: { p_bucket: string }; Returns: number }
+      ingest_upsert_course: {
+        Args: { p_dry_run?: boolean; p_payload: Json }
+        Returns: Json
+      }
+      ingest_write_lesson: {
+        Args: { p_course_id: string; p_lesson: Json; p_path?: string }
+        Returns: boolean
+      }
       is_admin: { Args: { user_id: string }; Returns: boolean }
       is_portfolio_admin: { Args: never; Returns: boolean }
       is_public_user: { Args: never; Returns: boolean }
