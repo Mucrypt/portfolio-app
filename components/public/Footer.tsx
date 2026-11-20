@@ -234,7 +234,7 @@ export default function Footer() {
         <div className='py-8 border-t border-zinc-800'>
           <div className='flex flex-col md:flex-row items-center justify-between gap-4'>
             <p className='text-zinc-500 text-sm'>
-              © {currentYear} Romeo Mukula. All rights reserved.
+              © {currentYear} Romeo Mukulah. All rights reserved.
             </p>
             <div className='flex items-center gap-6'>
               <Link
