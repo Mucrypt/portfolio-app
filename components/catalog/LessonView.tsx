@@ -103,7 +103,7 @@ export default function LessonView({ page, courseHref, lessonHrefBase, preview =
                 <summary className='cursor-pointer select-none px-5 py-4 font-semibold text-gray-900 dark:text-white'>
                   Transcript
                 </summary>
-                <div className='max-h-[32rem] overflow-y-auto whitespace-pre-line border-t border-gray-200 px-5 py-4 text-sm leading-relaxed text-gray-700 dark:border-gray-700 dark:text-gray-300'>
+                <div className='max-h-128 overflow-y-auto whitespace-pre-line border-t border-gray-200 px-5 py-4 text-sm leading-relaxed text-gray-700 dark:border-gray-700 dark:text-gray-300'>
                   {lesson.transcript}
                 </div>
               </details>

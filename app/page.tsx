@@ -1,7 +1,7 @@
 import Link from 'next/link'
+import CookieSettingsButton from '@/components/consent/CookieSettingsButton'
 import {
   ArrowRight,
-  Code2,
   Briefcase,
   ShoppingCart,
   GraduationCap,
@@ -175,7 +175,7 @@ export default async function LandingPage() {
                 </div>
                 <h3 className='text-2xl font-bold mb-3 text-white'>Contact</h3>
                 <p className='text-gray-400 mb-4'>
-                  Let's collaborate! Get in touch for projects, consultations,
+                  Let&apos;s collaborate! Get in touch for projects, consultations,
                   or just to say hi.
                 </p>
                 <span className='text-cyan-400 font-medium flex items-center gap-2 group-hover:gap-3 transition-all'>
@@ -242,6 +242,12 @@ export default async function LandingPage() {
           {/* Footer */}
           <div className='text-center text-gray-400 text-sm border-t border-gray-800 pt-8'>
             <p className='mb-2'>© 2026 Romeo Mukulah. All rights reserved.</p>
+            <p className='mb-2 flex items-center justify-center gap-4 flex-wrap'>
+              <Link href='/privacy' className='hover:text-white'>Privacy</Link>
+              <Link href='/terms' className='hover:text-white'>Terms</Link>
+              <Link href='/refunds' className='hover:text-white'>Refunds</Link>
+              <CookieSettingsButton className='hover:text-white' />
+            </p>
             <p className='flex items-center justify-center gap-2 flex-wrap'>
               <span>
                 Deployed on{' '}
