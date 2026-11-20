@@ -250,6 +250,12 @@ export default function Footer() {
                 Terms of Service
               </Link>
               <Link
+                href='/refunds'
+                className='text-zinc-500 hover:text-white text-sm transition-colors'
+              >
+                Refunds
+              </Link>
+              <Link
                 href='/sitemap'
                 className='text-zinc-500 hover:text-white text-sm transition-colors'
               >

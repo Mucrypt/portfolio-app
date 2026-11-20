@@ -11,7 +11,11 @@ import {
   PlayCircle,
   Code2,
 } from 'lucide-react'
-import { commerceEnabled, getProduct } from '@/lib/catalog/queries'
+import { getProduct } from '@/lib/catalog/queries'
+import { commerceEnabled, productOfferKey } from '@/lib/commerce/offers'
+import { displayPrice } from '@/lib/commerce/prices'
+import { getViewer } from '@/lib/commerce/access'
+import BuyButton from '@/components/commerce/BuyButton'
 import { embedUrl, formatDuration, isYouTubeId } from '@/lib/catalog/youtube'
 
 type Params = { params: Promise<{ slug: string }> }
@@ -44,7 +48,10 @@ export default async function ProductPage({ params }: Params) {
   const { product, courses } = page
   const course = courses[0] ?? null
   const showcase = isYouTubeId(product.showcase_video_ref) ? product.showcase_video_ref : null
-  const sellable = commerceEnabled() && product.status === 'available'
+  const offerKey = productOfferKey(product.slug)
+  const sellable = commerceEnabled() && product.status === 'available' && !!offerKey
+  const [price, viewer] = sellable ? await Promise.all([displayPrice(offerKey!), getViewer()]) : [null, null]
+  const owned = !!viewer?.ownedProductIds.has(product.id)
 
   return (
     <div className='min-h-screen bg-linear-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-950'>
@@ -214,13 +221,34 @@ export default async function ProductPage({ params }: Params) {
           <aside className='space-y-6'>
             <section className='rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800'>
               <h2 className='mb-2 text-lg font-bold text-gray-900 dark:text-white'>Get the source code</h2>
-              {sellable ? (
-                // Phase 2: Lemon Squeezy checkout + membership buttons render here.
-                <p className='text-sm text-gray-600 dark:text-gray-400'>Checkout is loading…</p>
+              {sellable && owned ? (
+                <div className='space-y-3'>
+                  <p className='text-sm text-gray-700 dark:text-gray-300'>You own the source code.</p>
+                  <a
+                    href={`/api/commerce/download/${product.slug}`}
+                    className='inline-flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-5 py-3 font-semibold text-white hover:bg-blue-700'
+                  >
+                    <Download className='h-5 w-5' /> Download the source code
+                  </a>
+                </div>
+              ) : sellable ? (
+                <div className='space-y-3'>
+                  {price && (
+                    <p className='text-3xl font-bold text-gray-900 dark:text-white'>
+                      {price.label} <span className='text-sm font-normal text-gray-500'>one-time</span>
+                    </p>
+                  )}
+                  <BuyButton offer={offerKey!} returnTo={`/products/${product.slug}`}>
+                    <Code2 className='h-5 w-5' /> Buy the source code
+                  </BuyButton>
+                  <p className='text-xs text-gray-500 dark:text-gray-400'>
+                    Secure checkout by Stripe. See the <Link href='/refunds' className='underline'>refund policy</Link>{' '}
+                    and <Link href='/terms' className='underline'>terms</Link>.
+                  </p>
+                </div>
               ) : (
                 <p className='text-sm leading-relaxed text-gray-600 dark:text-gray-400'>
-                  The complete source code will be available here soon, as a one-time purchase or included
-                  in the membership.
+                  The complete source code will be available here soon as a one-time purchase.
                   {course && ' Until then, the free course builds it step by step.'}
                 </p>
               )}

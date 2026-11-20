@@ -326,3 +326,45 @@ The admin courses page gets a curriculum editor, or stays read-only for YTFactor
 5. Build the curriculum and lesson pages. Then bulk-import.
 6. (If paid) Add Stripe checkout, enrollments, and signed video playback.
 7. Clean up: remove duplicate course pages, choose one deploy path, consolidate the docs.
+
+## 8. Commerce (phase 2, built 2026-11-20; off until `COMMERCE_ENABLED=true`)
+
+**Provider:** Stripe Managed Payments (Stripe is merchant of record: tax, receipts, disputes). Lemon Squeezy
+closed to new stores. Hosted Checkout only; the site never sees card data.
+
+**What's sold** (`lib/commerce/offers.ts`): membership monthly/yearly (unlocks every `access = 'members'`
+course) and one-off source code per product. Price ids come from env (`STRIPE_PRICE_*`); only listed
+prices grant anything.
+
+**Flow**
+
+1. `POST /api/commerce/checkout` (form, same-origin, signed in, verified email) → one Stripe customer per
+   user (`commerce_customers`, created server-side with the verified email) → Checkout Session
+   (`managed_payments.enabled`, `client_reference_id = user id`) → 303 to Stripe.
+2. `POST /api/webhooks/stripe`: signature verified on the raw body (Stripe SDK, HMAC, constant time, 5-min
+   tolerance) → event id recorded in `commerce_events` (duplicates skipped) → `lib/commerce/fulfil.ts`
+   re-reads the session / subscription / charge from Stripe's API (payload amounts and ids are never
+   trusted), resolves the user through `commerce_customers`, and upserts `purchases`, `subscriptions`,
+   `entitlements`. Permanent problems are recorded (`last_error`) and answered 200; temporary ones 500 so
+   Stripe retries.
+3. Access reads only `entitlements` (`public.has_membership`, `public.i_am_member()`). Membership access =
+   paid period + 3 days grace. A full refund of a purchase revokes its entitlement.
+
+**Gating:** RLS on `course_lessons` returns a published lesson's row only when its course is free, the lesson
+is `access = 'free_preview'`, the reader is a member, or the reader is the owner. Everyone else gets
+`public.course_outline()` (titles, no video/transcript/chapters/resources) and a lock screen. A trigger
+refuses to publish a members-only lesson while `site_flags.members_content` is false.
+
+**Paid files:** private bucket `product-files`, rows in `product_files` (owner-only). `GET
+/api/commerce/download/{slug}` checks the entitlement and redirects to a 60-second signed URL.
+
+**Pages:** `/membership`, `/account/billing` (status, downloads, Stripe billing portal), `/terms`, `/refunds`
+(draft banner + noindex until `lib/legal.ts` is reviewed).
+
+**Env:** `STRIPE_SECRET_KEY` (restricted key), `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_MEMBER_MONTHLY`,
+`STRIPE_PRICE_MEMBER_YEARLY`, `STRIPE_PRICE_SQUAD_STREAKS_SOURCE`, optional `STRIPE_MANAGED_PAYMENTS=false`
+(sandbox without MP terms), `COMMERCE_ENABLED`.
+
+**Go-live checklist:** business registered + Managed Payments eligibility confirmed; `lib/legal.ts` filled
+and `reviewed: true`; a privacy policy page; live keys, prices and webhook in Vercel; one real test
+purchase + refund; then `COMMERCE_ENABLED=true` and, for members courses, `site_flags.members_content = true`.

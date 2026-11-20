@@ -3,7 +3,7 @@
  * owner preview (/admin/courses/[slug]/preview/[lesson]). Server component.
  */
 import Link from 'next/link'
-import { ArrowLeft, ArrowRight, ExternalLink, Package } from 'lucide-react'
+import { ArrowLeft, ArrowRight, ExternalLink, Lock, Package } from 'lucide-react'
 import LessonPlayer from '@/components/catalog/LessonPlayer'
 import type { LessonPage } from '@/lib/catalog/queries'
 import { formatDuration, isYouTubeId, watchUrl } from '@/lib/catalog/youtube'
@@ -50,7 +50,21 @@ export default function LessonView({ page, courseHref, lessonHrefBase, preview =
         </div>
         <h1 className='mb-6 text-2xl font-bold text-gray-900 dark:text-white md:text-4xl'>{lesson.title}</h1>
 
-        {hasVideo ? (
+        {lesson.locked ? (
+          <div className='flex aspect-video w-full flex-col items-center justify-center gap-4 rounded-xl bg-gray-900 px-6 text-center text-white'>
+            <Lock className='h-10 w-10 text-blue-300' />
+            <p className='max-w-md text-lg font-semibold'>This lesson is for members.</p>
+            <p className='max-w-md text-sm text-gray-300'>
+              The membership unlocks every members-only lesson, with transcripts and resources.
+            </p>
+            <Link
+              href='/membership'
+              className='rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold hover:bg-blue-700'
+            >
+              See the membership
+            </Link>
+          </div>
+        ) : hasVideo ? (
           <LessonPlayer videoId={lesson.video_ref!} title={lesson.title} chapters={lesson.chapters} />
         ) : (
           <div className='flex aspect-video w-full items-center justify-center rounded-xl bg-gray-100 text-gray-500 dark:bg-gray-800'>

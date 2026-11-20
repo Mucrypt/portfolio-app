@@ -36,6 +36,9 @@ export async function setLessonPublished(lessonId: string, published: boolean): 
     .select('id')
   if (error) {
     if (error.code === '23514') return { ok: false, message: 'This lesson has no YouTube video yet.' }
+    if (error.message === 'members_content_disabled') {
+      return { ok: false, message: 'Members-only lessons can’t be published until memberships are live.' }
+    }
     console.error(`[admin courses] publish lesson: ${error.code ?? ''} ${error.message}`)
     return { ok: false, message: 'Could not save. Try again.' }
   }
@@ -62,6 +65,9 @@ export async function publishModuleLessons(courseId: string, moduleId: string | 
 
   const { data, error } = await query.select('id')
   if (error) {
+    if (error.message === 'members_content_disabled') {
+      return { ok: false, message: 'Members-only lessons can’t be published until memberships are live.' }
+    }
     console.error(`[admin courses] publish module: ${error.code ?? ''} ${error.message}`)
     return { ok: false, message: 'Could not save. Try again.' }
   }

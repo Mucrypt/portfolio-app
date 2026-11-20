@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
 import { notFound } from 'next/navigation'
-import { ArrowLeft, Clock, PlayCircle, Package } from 'lucide-react'
+import { ArrowLeft, Clock, Lock, PlayCircle, Package } from 'lucide-react'
 import { getCourse } from '@/lib/catalog/queries'
 import { formatDuration, lessonImage, playlistEmbedUrl } from '@/lib/catalog/youtube'
 import type { CourseDetail, Lesson } from '@/lib/catalog/types'
@@ -14,7 +14,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const course = await getCourse(slug)
   if (!course) return { title: 'Course not found' }
   return {
-    title: `${course.title} | Free course`,
+    title: `${course.title} | ${course.access === 'members' ? 'Members course' : 'Free course'}`,
     description: course.description.slice(0, 160),
   }
 }
@@ -48,6 +48,14 @@ function LessonRow({ courseSlug, lesson }: { courseSlug: string; lesson: Lesson 
       <div className='min-w-0'>
         <div className='mb-1 text-xs font-semibold uppercase tracking-wide text-blue-600 dark:text-blue-400'>
           Part {lesson.sort_order}
+          {lesson.locked && (
+            <span className='ml-2 inline-flex items-center gap-1 normal-case text-gray-500 dark:text-gray-400'>
+              <Lock className='h-3 w-3' /> Members
+            </span>
+          )}
+          {!lesson.locked && lesson.access === 'free_preview' && (
+            <span className='ml-2 normal-case text-green-700 dark:text-green-400'>Free preview</span>
+          )}
           {formatDuration(lesson.duration_seconds) && (
             <span className='ml-2 font-normal normal-case text-gray-500 dark:text-gray-400'>
               · {formatDuration(lesson.duration_seconds)}
@@ -85,9 +93,15 @@ export default async function CourseDetailPage({ params }: Params) {
         </Link>
 
         <header className='mb-10'>
-          <span className='mb-4 inline-block rounded-full bg-green-600 px-3 py-1 text-xs font-bold text-white'>
-            Free course
-          </span>
+          {course.access === 'members' ? (
+            <span className='mb-4 inline-block rounded-full bg-blue-600 px-3 py-1 text-xs font-bold text-white'>
+              Members course
+            </span>
+          ) : (
+            <span className='mb-4 inline-block rounded-full bg-green-600 px-3 py-1 text-xs font-bold text-white'>
+              Free course
+            </span>
+          )}
           <h1 className='mb-4 text-3xl font-bold text-gray-900 dark:text-white md:text-5xl'>{course.title}</h1>
           <p className='mb-6 max-w-3xl text-lg leading-relaxed text-gray-600 dark:text-gray-400'>
             {course.description}

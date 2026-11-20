@@ -14,7 +14,7 @@ Sibling systems. Each has its own repo, and none of them writes another system's
 |---|---|---|
 | ytfactory | Turns builds into courses | `docs/ingest/CONTRACT.md` (HTTP ingest API) |
 | mukulah-studio | Posts to social platforms | Read API (contract to be written in `docs/`) |
-| Lemon Squeezy | Payments (merchant of record) | Signed webhooks into this site |
+| Stripe (Managed Payments) | Payments (merchant of record) | Hosted Checkout + signed webhooks into this site (`/api/webhooks/stripe`) |
 | MukuVoice, MukuPay | Future TTS and payments | Future contracts. MukuPay is a second payment `provider` |
 
 Architecture and known issues: `docs/SYSTEM_DESIGN.md`.
@@ -75,7 +75,7 @@ unless he asks.
 
 ## Payments
 
-- All provider-specific code (Lemon Squeezy today, MukuPay later) sits behind one module (`lib/commerce/`).
+- All provider-specific code (Stripe today, MukuPay later) sits behind one module (`lib/commerce/`).
   Tables (`purchases`, `subscriptions`, `entitlements`) carry a `provider` column. Adding a provider must not
   need a schema change.
 - Buy and membership UI stays behind the `COMMERCE_ENABLED` env flag until checkout, webhook and entitlements are

@@ -42,7 +42,8 @@ export type Product = {
   sort_order: number
 }
 
-export type CourseAccess = 'free' | 'paid' | 'members'
+export type CourseAccess = 'free' | 'members'
+export type LessonAccess = 'inherit' | 'free_preview'
 
 export type Chapter = { start: number; title: string }
 export type Resource = {
@@ -78,6 +79,12 @@ export type Lesson = {
   chapters: Chapter[]
   resources: Resource[]
   is_published: boolean
+  access: LessonAccess
+  /**
+   * True when the reader may not see this lesson's content (members-only, not a member).
+   * A locked lesson carries only outline fields: video_ref, transcript, chapters and resources are empty.
+   */
+  locked: boolean
 }
 
 export type Course = {

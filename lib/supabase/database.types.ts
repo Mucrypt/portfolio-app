@@ -635,6 +635,57 @@ export type Database = {
         }
         Relationships: []
       }
+      commerce_customers: {
+        Row: {
+          created_at: string
+          provider: string
+          provider_customer_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          provider: string
+          provider_customer_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          provider?: string
+          provider_customer_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      commerce_events: {
+        Row: {
+          attempts: number
+          event_id: string
+          last_error: string | null
+          processed_at: string | null
+          provider: string
+          received_at: string
+          type: string
+        }
+        Insert: {
+          attempts?: number
+          event_id: string
+          last_error?: string | null
+          processed_at?: string | null
+          provider: string
+          received_at?: string
+          type: string
+        }
+        Update: {
+          attempts?: number
+          event_id?: string
+          last_error?: string | null
+          processed_at?: string | null
+          provider?: string
+          received_at?: string
+          type?: string
+        }
+        Relationships: []
+      }
       contact_inquiries: {
         Row: {
           admin_notes: string | null
@@ -696,6 +747,7 @@ export type Database = {
       }
       course_lessons: {
         Row: {
+          access: string
           chapters: Json
           course_id: string
           created_at: string
@@ -719,6 +771,7 @@ export type Database = {
           video_ref: string | null
         }
         Insert: {
+          access?: string
           chapters?: Json
           course_id: string
           created_at?: string
@@ -742,6 +795,7 @@ export type Database = {
           video_ref?: string | null
         }
         Update: {
+          access?: string
           chapters?: Json
           course_id?: string
           created_at?: string
@@ -910,6 +964,62 @@ export type Database = {
           start_date?: string | null
         }
         Relationships: []
+      }
+      entitlements: {
+        Row: {
+          created_at: string
+          ends_at: string | null
+          id: string
+          kind: string
+          note: string | null
+          product_id: string | null
+          provider: string
+          revoked_at: string | null
+          source: string
+          source_ref: string
+          starts_at: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          ends_at?: string | null
+          id?: string
+          kind: string
+          note?: string | null
+          product_id?: string | null
+          provider: string
+          revoked_at?: string | null
+          source: string
+          source_ref: string
+          starts_at?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          ends_at?: string | null
+          id?: string
+          kind?: string
+          note?: string | null
+          product_id?: string | null
+          provider?: string
+          revoked_at?: string | null
+          source?: string
+          source_ref?: string
+          starts_at?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "entitlements_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       experiences: {
         Row: {
@@ -1117,6 +1227,47 @@ export type Database = {
           title?: string | null
         }
         Relationships: []
+      }
+      product_files: {
+        Row: {
+          created_at: string
+          filename: string
+          id: string
+          is_current: boolean
+          product_id: string
+          size_bytes: number | null
+          storage_path: string
+          version: string | null
+        }
+        Insert: {
+          created_at?: string
+          filename: string
+          id?: string
+          is_current?: boolean
+          product_id: string
+          size_bytes?: number | null
+          storage_path: string
+          version?: string | null
+        }
+        Update: {
+          created_at?: string
+          filename?: string
+          id?: string
+          is_current?: boolean
+          product_id?: string
+          size_bytes?: number | null
+          storage_path?: string
+          version?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_files_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       products: {
         Row: {
@@ -1646,6 +1797,56 @@ export type Database = {
           user_role?: string
         }
         Relationships: []
+      }
+      purchases: {
+        Row: {
+          amount_total: number | null
+          created_at: string
+          currency: string | null
+          id: string
+          product_id: string
+          provider: string
+          provider_order_id: string
+          provider_price_id: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount_total?: number | null
+          created_at?: string
+          currency?: string | null
+          id?: string
+          product_id: string
+          provider: string
+          provider_order_id: string
+          provider_price_id?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount_total?: number | null
+          created_at?: string
+          currency?: string | null
+          id?: string
+          product_id?: string
+          provider?: string
+          provider_order_id?: string
+          provider_price_id?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purchases_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       sections: {
         Row: {
@@ -2388,6 +2589,24 @@ export type Database = {
         }
         Relationships: []
       }
+      site_flags: {
+        Row: {
+          enabled: boolean
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          enabled?: boolean
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          enabled?: boolean
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       skills: {
         Row: {
           category: string
@@ -2415,6 +2634,54 @@ export type Database = {
           name?: string
           owner_user_id?: string
           sort_order?: number
+        }
+        Relationships: []
+      }
+      subscriptions: {
+        Row: {
+          cancel_at_period_end: boolean
+          created_at: string
+          current_period_end: string | null
+          id: string
+          plan: string | null
+          provider: string
+          provider_customer_id: string | null
+          provider_price_id: string | null
+          provider_status: string | null
+          provider_subscription_id: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          cancel_at_period_end?: boolean
+          created_at?: string
+          current_period_end?: string | null
+          id?: string
+          plan?: string | null
+          provider: string
+          provider_customer_id?: string | null
+          provider_price_id?: string | null
+          provider_status?: string | null
+          provider_subscription_id: string
+          status: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          cancel_at_period_end?: boolean
+          created_at?: string
+          current_period_end?: string | null
+          id?: string
+          plan?: string | null
+          provider?: string
+          provider_customer_id?: string | null
+          provider_price_id?: string | null
+          provider_status?: string | null
+          provider_subscription_id?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -2671,6 +2938,24 @@ export type Database = {
     }
     Functions: {
       course_is_live: { Args: { p_course_id: string }; Returns: boolean }
+      course_outline: {
+        Args: { p_course_id: string }
+        Returns: {
+          access: string
+          course_id: string
+          description: string
+          duration_seconds: number
+          external_id: string
+          id: string
+          is_open: boolean
+          module_id: string
+          objective: string
+          slug: string
+          sort_order: number
+          thumbnail_url: string
+          title: string
+        }[]
+      }
       get_public_user: {
         Args: never
         Returns: {
@@ -2696,6 +2981,8 @@ export type Database = {
         }
       }
       get_user_type: { Args: never; Returns: string }
+      has_membership: { Args: { p_user_id: string }; Returns: boolean }
+      i_am_member: { Args: never; Returns: boolean }
       ingest_assert_sender: { Args: { p_sender: string }; Returns: undefined }
       ingest_get_course: { Args: { p_external_id: string }; Returns: Json }
       ingest_patch_lesson: {
@@ -2719,6 +3006,10 @@ export type Database = {
       is_admin: { Args: { user_id: string }; Returns: boolean }
       is_portfolio_admin: { Args: never; Returns: boolean }
       is_public_user: { Args: never; Returns: boolean }
+      lesson_is_open: {
+        Args: { p_access: string; p_course_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never

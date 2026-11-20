@@ -5,15 +5,22 @@
  * lessons, non-draft products, and courses that have at least one published
  * lesson. Every query also filters explicitly, so the pages stay correct even
  * if a policy is loosened later.
+ *
+ * Members-only lessons: RLS returns a lesson's full row only when the course is free, the
+ * lesson is a free preview, or the reader is a member (public.i_am_member()). Everything else
+ * comes from public.course_outline(), which has no video, transcript, chapters or resources,
+ * and is marked `locked`.
  */
 import { createClient } from '@/lib/supabase/server'
 import type {
+  Chapter,
   Course,
   CourseDetail,
   CourseModule,
   CourseSummary,
   Lesson,
   Product,
+  Resource,
 } from './types'
 import { lessonImage } from './youtube'
 
@@ -23,7 +30,7 @@ import { lessonImage } from './youtube'
 const db = createClient
 
 const LESSON_LIST_COLUMNS =
-  'id, course_id, module_id, external_id, slug, title, description, objective, sort_order, duration_seconds, video_provider, video_ref, short_ref, thumbnail_url, chapters, resources, is_published'
+  'id, course_id, module_id, external_id, slug, title, description, objective, sort_order, duration_seconds, video_provider, video_ref, short_ref, thumbnail_url, chapters, resources, is_published, access'
 
 function logError(where: string, error: { message: string } | null) {
   if (error) console.error(`[catalog] ${where}: ${error.message}`)
@@ -54,10 +61,17 @@ export async function listCourses(): Promise<CourseSummary[]> {
     ? await supabase.from('products').select('id, slug, title').in('id', productIds)
     : { data: [] as { id: string; slug: string; title: string }[] }
 
+  type ListLesson = Pick<Lesson, 'course_id' | 'duration_seconds' | 'video_ref' | 'thumbnail_url'>
   const summaries: CourseSummary[] = []
   for (const course of courses as Course[]) {
-    const own = (lessons as Pick<Lesson, 'course_id' | 'duration_seconds' | 'video_ref' | 'thumbnail_url'>[])
-      .filter((l) => l.course_id === course.id)
+    let own = (lessons as ListLesson[]).filter((l) => l.course_id === course.id)
+    if (course.access === 'members') {
+      // Locked lessons aren't in `lessons` for non-members; count them from the outline.
+      const { data: outline } = await supabase.rpc('course_outline', { p_course_id: course.id })
+      if (outline && outline.length > own.length) {
+        own = outline.map((o) => ({ ...o, video_ref: null }))
+      }
+    }
     if (own.length === 0) continue // not listed until a lesson is public
 
     const product = products?.find((p) => p.id === course.product_id) ?? null
@@ -90,7 +104,7 @@ export async function getCourse(slug: string, opts: ReadOptions = {}): Promise<C
   logError('getCourse', error)
   if (!course) return null
 
-  const [{ data: modules }, { data: lessons }, { data: product }] = await Promise.all([
+  const [{ data: modules }, { data: lessons }, { data: outline }, { data: product }] = await Promise.all([
     supabase
       .from('course_modules')
       .select('id, course_id, external_id, title, sort_order')
@@ -100,6 +114,7 @@ export async function getCourse(slug: string, opts: ReadOptions = {}): Promise<C
       const q = supabase.from('course_lessons').select(LESSON_LIST_COLUMNS).eq('course_id', course.id)
       return (opts.preview ? q : q.eq('is_published', true)).order('sort_order', { ascending: true })
     })(),
+    opts.preview ? Promise.resolve({ data: null }) : supabase.rpc('course_outline', { p_course_id: course.id }),
     course.product_id
       ? supabase
           .from('products')
@@ -109,12 +124,51 @@ export async function getCourse(slug: string, opts: ReadOptions = {}): Promise<C
       : Promise.resolve({ data: null }),
   ])
 
-  const published = ((lessons ?? []) as Omit<Lesson, 'transcript'>[]).map((l) => ({
-    ...l,
-    transcript: null,
-    chapters: Array.isArray(l.chapters) ? l.chapters : [],
-    resources: Array.isArray(l.resources) ? l.resources : [],
-  }))
+  type Row = Omit<Lesson, 'transcript' | 'locked' | 'chapters' | 'resources'> & {
+    chapters: unknown
+    resources: unknown
+  }
+  const readable = new Map(
+    ((lessons ?? []) as Row[]).map((l) => [
+      l.id,
+      {
+        ...l,
+        transcript: null,
+        chapters: (Array.isArray(l.chapters) ? l.chapters : []) as Chapter[],
+        resources: (Array.isArray(l.resources) ? l.resources : []) as Resource[],
+        locked: false,
+      } satisfies Lesson,
+    ]),
+  )
+
+  // Owner preview reads every row directly; everyone else gets readable rows plus locked outline rows.
+  const published: Lesson[] = opts.preview
+    ? [...readable.values()]
+    : (outline ?? []).map(
+        (o) =>
+          readable.get(o.id) ?? {
+            id: o.id,
+            course_id: o.course_id,
+            module_id: o.module_id,
+            external_id: o.external_id,
+            slug: o.slug,
+            title: o.title,
+            description: o.description,
+            objective: o.objective,
+            sort_order: o.sort_order,
+            duration_seconds: o.duration_seconds,
+            video_provider: 'youtube',
+            video_ref: null,
+            short_ref: null,
+            thumbnail_url: o.thumbnail_url,
+            transcript: null,
+            chapters: [],
+            resources: [],
+            is_published: true,
+            access: o.access as Lesson['access'],
+            locked: true,
+          },
+      )
   if (published.length === 0) return null
 
   return {
@@ -142,6 +196,16 @@ export async function getLesson(
 
   const index = course.lessons.findIndex((l) => l.slug === lessonSlug)
   if (index === -1) return null
+
+  // Locked: no transcript to load (RLS would return nothing anyway).
+  if (course.lessons[index].locked) {
+    return {
+      course,
+      lesson: course.lessons[index],
+      prev: course.lessons[index - 1] ?? null,
+      next: course.lessons[index + 1] ?? null,
+    }
+  }
 
   // The transcript is only loaded for the lesson being viewed (they can be ~35 KB each).
   const supabase = await db()
@@ -201,9 +265,4 @@ export async function getProduct(slug: string): Promise<ProductPage | null> {
 
   const courses = (await listCourses()).filter((c) => c.product_id === data.id)
   return { product: normaliseProduct(data), courses }
-}
-
-/** Buy / membership UI stays hidden until checkout, webhook and entitlements are live (phase 2). */
-export function commerceEnabled() {
-  return process.env.COMMERCE_ENABLED === 'true'
 }
