@@ -2696,14 +2696,20 @@ export type Database = {
         }
       }
       get_user_type: { Args: never; Returns: string }
+      ingest_assert_sender: { Args: { p_sender: string }; Returns: undefined }
       ingest_get_course: { Args: { p_external_id: string }; Returns: Json }
       ingest_patch_lesson: {
-        Args: { p_dry_run?: boolean; p_external_id: string; p_patch: Json }
+        Args: {
+          p_dry_run?: boolean
+          p_external_id: string
+          p_patch: Json
+          p_sender?: string
+        }
         Returns: Json
       }
       ingest_rate_hit: { Args: { p_bucket: string }; Returns: number }
       ingest_upsert_course: {
-        Args: { p_dry_run?: boolean; p_payload: Json }
+        Args: { p_dry_run?: boolean; p_payload: Json; p_sender?: string }
         Returns: Json
       }
       ingest_write_lesson: {
