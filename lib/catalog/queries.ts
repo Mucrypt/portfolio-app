@@ -72,7 +72,14 @@ export async function listCourses(): Promise<CourseSummary[]> {
   return summaries.sort((a, b) => a.title.localeCompare(b.title))
 }
 
-export async function getCourse(slug: string): Promise<CourseDetail | null> {
+/**
+ * `preview: true` includes unpublished lessons. Only call it after requireAdmin():
+ * RLS still hides drafts from everyone but the owner, so a misuse leaks nothing,
+ * but the page would 404 for visitors instead of rendering.
+ */
+type ReadOptions = { preview?: boolean }
+
+export async function getCourse(slug: string, opts: ReadOptions = {}): Promise<CourseDetail | null> {
   const supabase = await db()
 
   const { data: course, error } = await supabase
@@ -89,12 +96,10 @@ export async function getCourse(slug: string): Promise<CourseDetail | null> {
       .select('id, course_id, external_id, title, sort_order')
       .eq('course_id', course.id)
       .order('sort_order', { ascending: true }),
-    supabase
-      .from('course_lessons')
-      .select(LESSON_LIST_COLUMNS)
-      .eq('course_id', course.id)
-      .eq('is_published', true)
-      .order('sort_order', { ascending: true }),
+    (() => {
+      const q = supabase.from('course_lessons').select(LESSON_LIST_COLUMNS).eq('course_id', course.id)
+      return (opts.preview ? q : q.eq('is_published', true)).order('sort_order', { ascending: true })
+    })(),
     course.product_id
       ? supabase
           .from('products')
@@ -127,8 +132,12 @@ export type LessonPage = {
   next: Lesson | null
 }
 
-export async function getLesson(courseSlug: string, lessonSlug: string): Promise<LessonPage | null> {
-  const course = await getCourse(courseSlug)
+export async function getLesson(
+  courseSlug: string,
+  lessonSlug: string,
+  opts: ReadOptions = {},
+): Promise<LessonPage | null> {
+  const course = await getCourse(courseSlug, opts)
   if (!course) return null
 
   const index = course.lessons.findIndex((l) => l.slug === lessonSlug)
@@ -136,12 +145,10 @@ export async function getLesson(courseSlug: string, lessonSlug: string): Promise
 
   // The transcript is only loaded for the lesson being viewed (they can be ~35 KB each).
   const supabase = await db()
-  const { data } = await supabase
-    .from('course_lessons')
-    .select('transcript')
-    .eq('id', course.lessons[index].id)
-    .eq('is_published', true)
-    .maybeSingle<{ transcript: string | null }>()
+  const tq = supabase.from('course_lessons').select('transcript').eq('id', course.lessons[index].id)
+  const { data } = await (opts.preview ? tq : tq.eq('is_published', true)).maybeSingle<{
+    transcript: string | null
+  }>()
 
   return {
     course,

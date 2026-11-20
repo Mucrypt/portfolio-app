@@ -12,13 +12,16 @@ async function getSystemMetrics() {
   // Get total counts from all tables
   const [
     { count: projectsCount },
-    { count: blogPostsCount },
+    { count: lessonsPublishedCount },
     { count: coursesCount },
     { count: servicesCount },
     { count: shopItemsCount },
   ] = await Promise.all([
     supabase.from('projects').select('*', { count: 'exact', head: true }),
-    supabase.from('blog_posts').select('*', { count: 'exact', head: true }),
+    supabase
+      .from('course_lessons')
+      .select('*', { count: 'exact', head: true })
+      .eq('is_published', true),
     supabase.from('courses').select('*', { count: 'exact', head: true }),
     supabase.from('services').select('*', { count: 'exact', head: true }),
     supabase.from('shop_products').select('*', { count: 'exact', head: true }),
@@ -31,8 +34,8 @@ async function getSystemMetrics() {
     .order('updated_at', { ascending: false })
     .limit(5)
 
-  const { data: recentPosts } = await supabase
-    .from('blog_posts')
+  const { data: recentLessons } = await supabase
+    .from('course_lessons')
     .select('title, updated_at')
     .order('updated_at', { ascending: false })
     .limit(5)
@@ -40,14 +43,18 @@ async function getSystemMetrics() {
   return {
     counts: {
       projects: projectsCount || 0,
-      blogPosts: blogPostsCount || 0,
+      lessonsPublished: lessonsPublishedCount || 0,
       courses: coursesCount || 0,
       services: servicesCount || 0,
       shopItems: shopItemsCount || 0,
     },
     recentActivities: [
-      ...(recentProjects || []).map((p: any) => ({ type: 'project', ...p })),
-      ...(recentPosts || []).map((p: any) => ({ type: 'blog', ...p })),
+      ...(recentProjects || []).map((p) => ({
+        type: 'project',
+        title: p.title,
+        updated_at: p.updated_at ?? new Date(0).toISOString(),
+      })),
+      ...(recentLessons || []).map((p) => ({ type: 'lesson', ...p })),
     ]
       .sort(
         (a, b) =>
@@ -59,7 +66,7 @@ async function getSystemMetrics() {
 
 export default async function AdminDashboardPage() {
   // Verify user is authenticated and is the owner
-  const { user, profile } = await requireAdmin()
+  await requireAdmin()
 
   const metrics = await getSystemMetrics()
 

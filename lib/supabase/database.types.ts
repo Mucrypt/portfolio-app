@@ -702,6 +702,7 @@ export type Database = {
           description: string
           duration_seconds: number | null
           external_id: string
+          has_transcript: boolean | null
           id: string
           is_published: boolean
           module_id: string | null
@@ -724,6 +725,7 @@ export type Database = {
           description?: string
           duration_seconds?: number | null
           external_id: string
+          has_transcript?: boolean | null
           id?: string
           is_published?: boolean
           module_id?: string | null
@@ -746,6 +748,7 @@ export type Database = {
           description?: string
           duration_seconds?: number | null
           external_id?: string
+          has_transcript?: boolean | null
           id?: string
           is_published?: boolean
           module_id?: string | null

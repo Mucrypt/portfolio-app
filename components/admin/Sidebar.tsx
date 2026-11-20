@@ -65,6 +65,12 @@ const menuSections = [
       },
       {
         href: '/admin/courses',
+        label: 'Courses',
+        icon: GraduationCap,
+        badge: null,
+      },
+      {
+        href: '/admin/affiliate-courses',
         label: 'Affiliate (retired)',
         icon: GraduationCap,
         badge: null,

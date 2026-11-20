@@ -8,7 +8,6 @@ import {
   BarChart3,
   Clock,
   Database,
-  Eye,
   FileText,
   Globe,
   Server,
@@ -23,7 +22,7 @@ import CountryStatsWidget from '@/components/admin/CountryStatsWidget'
 type SystemMetrics = {
   counts: {
     projects: number
-    blogPosts: number
+    lessonsPublished: number
     courses: number
     services: number
     shopItems: number
@@ -40,7 +39,7 @@ type DashboardProps = {
 }
 
 export default function DashboardClient({ initialMetrics }: DashboardProps) {
-  const [metrics, setMetrics] = useState(initialMetrics)
+  const metrics = initialMetrics
   const [healthStatus, setHealthStatus] = useState<
     'healthy' | 'degraded' | 'down'
   >('healthy')
@@ -56,7 +55,7 @@ export default function DashboardClient({ initialMetrics }: DashboardProps) {
         } else {
           setHealthStatus('degraded')
         }
-      } catch (error) {
+      } catch {
         setHealthStatus('down')
       }
       setLastUpdate(new Date())
@@ -109,23 +108,20 @@ export default function DashboardClient({ initialMetrics }: DashboardProps) {
           value={metrics.counts.projects}
           icon={<FileText className='w-6 h-6' />}
           color='bg-blue-500'
-          trend='+12%'
           href='/admin/projects'
         />
         <MetricCard
-          title='Blog Posts'
-          value={metrics.counts.blogPosts}
+          title='Published Lessons'
+          value={metrics.counts.lessonsPublished}
           icon={<FileText className='w-6 h-6' />}
           color='bg-purple-500'
-          trend='+8%'
-          href='/admin/blog'
+          href='/admin/courses'
         />
         <MetricCard
           title='Courses'
           value={metrics.counts.courses}
           icon={<FileText className='w-6 h-6' />}
           color='bg-green-500'
-          trend='+15%'
           href='/admin/courses'
         />
         <MetricCard
@@ -133,7 +129,6 @@ export default function DashboardClient({ initialMetrics }: DashboardProps) {
           value={metrics.counts.services}
           icon={<Server className='w-6 h-6' />}
           color='bg-orange-500'
-          trend='+5%'
           href='/admin/services'
         />
       </div>
@@ -329,14 +324,12 @@ function MetricCard({
   value,
   icon,
   color,
-  trend,
   href,
 }: {
   title: string
   value: number
   icon: React.ReactNode
   color: string
-  trend: string
   href: string
 }) {
   return (
@@ -344,7 +337,6 @@ function MetricCard({
       <div className='bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow cursor-pointer'>
         <div className='flex items-center justify-between mb-4'>
           <div className={`${color} text-white p-3 rounded-lg`}>{icon}</div>
-          <span className='text-sm font-semibold text-green-600'>{trend}</span>
         </div>
         <h3 className='text-gray-600 text-sm font-medium'>{title}</h3>
         <p className='text-3xl font-bold text-gray-900 mt-2'>{value}</p>
