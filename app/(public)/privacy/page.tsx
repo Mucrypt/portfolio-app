@@ -42,8 +42,9 @@ export default function PrivacyPage() {
         </li>
         <li>
           <strong>Usage statistics:</strong> pages visited, device and browser type, approximate location
-          (country or city) and how you arrived, through Google Analytics, Vercel Web Analytics and Vercel
-          Speed Insights. We use this to see which content helps people and to keep the site fast.
+          (country or city) and how you arrived. Vercel Web Analytics and Speed Insights do this without
+          cookies, based on our legitimate interest in a fast, useful site. Google Analytics uses cookies and
+          runs only if you accept them in the cookie banner. Legal basis for Google Analytics: your consent.
         </li>
         <li>
           <strong>Error reports:</strong> when something breaks, Sentry receives technical details about the
@@ -72,15 +73,17 @@ export default function PrivacyPage() {
 
       <h2>Embedded videos</h2>
       <p>
-        Course videos are played with YouTube’s embedded player, so YouTube (Google) receives your IP
-        address and may set cookies when a video loads or plays. Google’s privacy policy applies to that.
+        Course videos are played with YouTube’s embedded player in privacy-enhanced mode. YouTube (Google)
+        still receives your IP address when a video loads, and may store data on your device once you play
+        it. Google’s privacy policy applies to that.
       </p>
 
       <h2>Cookies</h2>
       <p>
-        We use cookies that are needed to keep you signed in. Google Analytics and YouTube set their own
-        cookies as described above. You can block or delete cookies in your browser’s settings; the site
-        still works, but you’ll need to sign in again.
+        We always use the cookies needed to keep you signed in and to remember your cookie choice. Google
+        Analytics cookies are set only after you click “Accept” in the cookie banner; you can change your
+        mind at any time with “Cookie settings” at the bottom of every page, which also deletes them.
+        Course videos use YouTube’s privacy-enhanced mode (youtube-nocookie.com).
       </p>
 
       <h2>How long we keep it</h2>

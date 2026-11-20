@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import CookieSettingsButton from '@/components/consent/CookieSettingsButton'
 
 const footerLinks = {
   navigation: [
@@ -255,6 +256,7 @@ export default function Footer() {
               >
                 Refunds
               </Link>
+              <CookieSettingsButton className='text-zinc-500 hover:text-white text-sm transition-colors' />
               <Link
                 href='/sitemap'
                 className='text-zinc-500 hover:text-white text-sm transition-colors'
