@@ -15,13 +15,14 @@ type UpsertResult = {
 }
 
 export async function POST(request: NextRequest) {
-  return handle(request, async (dryRun) => {
+  return handle(request, async (dryRun, sender) => {
     const parsed = upsertCourseBody.safeParse(await readJson(request))
     if (!parsed.success) throw validationError(parsed.error)
 
     const { data, error } = await createAdminClient().rpc('ingest_upsert_course', {
       p_payload: parsed.data as unknown as Json,
       p_dry_run: dryRun,
+      p_sender: sender,
     })
     if (error) throw dbError(error, 'upsert_course')
 

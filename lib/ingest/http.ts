@@ -71,23 +71,38 @@ function tokenMatches(presented: string, expected: string | undefined) {
   return timingSafeEqual(digest(presented), digest(expected))
 }
 
-export function requireToken(request: NextRequest) {
+/** Who is calling. Each sender has its own token (plus a _NEXT one while rotating). */
+export type Sender = 'ytfactory' | 'studio'
+
+const SENDER_TOKENS: Record<Sender, string[]> = {
+  ytfactory: ['INGEST_TOKEN', 'INGEST_TOKEN_NEXT'],
+  studio: ['INGEST_TOKEN_STUDIO', 'INGEST_TOKEN_STUDIO_NEXT'],
+}
+
+export function requireToken(request: NextRequest): Sender {
   const header = request.headers.get('authorization') ?? ''
   const match = /^Bearer ([^\s]+)$/.exec(header)
   const presented = match?.[1] ?? ''
 
-  // Evaluate both so the time taken doesn't depend on which one matched.
-  const current = tokenMatches(presented, process.env.INGEST_TOKEN)
-  const next = tokenMatches(presented, process.env.INGEST_TOKEN_NEXT)
-  if (!presented || !(current || next)) {
+  // Evaluate every token so the time taken doesn't depend on which one matched.
+  const matched = (Object.keys(SENDER_TOKENS) as Sender[]).filter((sender) =>
+    SENDER_TOKENS[sender].map((name) => tokenMatches(presented, process.env[name])).some(Boolean),
+  )
+  if (!presented || matched.length === 0) {
     throw new IngestError(401, 'unauthorized', 'Missing or invalid token.')
   }
+  if (matched.length > 1) {
+    // The same value is configured for two senders: refuse rather than guess.
+    console.error('[ingest] one token is configured for more than one sender; refusing')
+    throw new IngestError(401, 'unauthorized', 'Missing or invalid token.')
+  }
+  return matched[0]
 }
 
 // --- rate limit -------------------------------------------------------------
 
-export async function enforceRateLimit() {
-  const { data, error } = await createAdminClient().rpc('ingest_rate_hit', { p_bucket: 'ingest' })
+export async function enforceRateLimit(sender: Sender) {
+  const { data, error } = await createAdminClient().rpc('ingest_rate_hit', { p_bucket: `ingest:${sender}` })
   if (error) {
     // Fail open: a counter outage shouldn't block ingest, and auth already passed.
     console.error(`[ingest] rate limiter unavailable: ${error.code ?? ''} ${error.message}`)
@@ -179,6 +194,7 @@ const BUSINESS_ERRORS: Record<string, number> = {
   unknown_module: 422,
   publish_requires_video_ref: 422,
   lesson_belongs_to_other_course: 409,
+  course_owned_by_other_sender: 409,
   lesson_not_found: 404,
 }
 
@@ -199,18 +215,18 @@ export function dbError(error: DbError, where: string): IngestError {
 }
 
 /**
- * Wrap a handler: auth → rate limit → handler, with every failure turned into
+ * Wrap a handler: auth (which sender?) → per-sender rate limit → handler, with every failure turned into
  * the contract's error envelope.
  */
 export async function handle(
   request: NextRequest,
-  run: (dryRun: boolean) => Promise<NextResponse>,
+  run: (dryRun: boolean, sender: Sender) => Promise<NextResponse>,
 ): Promise<NextResponse> {
   const dryRun = isDryRun(request)
   try {
-    requireToken(request)
-    await enforceRateLimit()
-    return await run(dryRun)
+    const sender = requireToken(request)
+    await enforceRateLimit(sender)
+    return await run(dryRun, sender)
   } catch (err) {
     if (err instanceof IngestError) return fail(err, dryRun && err.status !== 401)
     console.error('[ingest] unexpected error', err instanceof Error ? err.message : err)

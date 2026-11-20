@@ -21,7 +21,7 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ external_id: string }> },
 ) {
-  return handle(request, async (dryRun) => {
+  return handle(request, async (dryRun, sender) => {
     const { external_id } = await params
     if (!pathId.safeParse(external_id).success) {
       throw new IngestError(404, 'lesson_not_found', `No lesson with external_id "${external_id.slice(0, 120)}".`)
@@ -34,6 +34,7 @@ export async function PATCH(
       p_external_id: external_id,
       p_patch: parsed.data as unknown as Json,
       p_dry_run: dryRun,
+      p_sender: sender,
     })
     if (error) throw dbError(error, 'patch_lesson')
 

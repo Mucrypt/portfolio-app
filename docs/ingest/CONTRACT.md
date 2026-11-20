@@ -1,4 +1,4 @@
-# Course Ingest API — Contract v0.2
+# Course Ingest API — Contract v0.2.1
 
 Status: **implemented** (`app/api/ingest/*`, database functions in
 `supabase/migrations/20261119140000_ingest_api.sql`). Live once that migration is applied and
@@ -16,9 +16,11 @@ Reference data used to design it: `~/ytfactory/output/_catalog/squad-streaks.jso
 | | |
 |---|---|
 | Base URL | `https://romeomukulah.org` (production) · `http://localhost:3000` (local) · Vercel preview URL (preview) |
-| Auth | `Authorization: Bearer <INGEST_TOKEN>` on every request |
-| Token | Random, ≥ 32 bytes (e.g. `openssl rand -base64 48`). Same value in ytfactory's env and the site's Vercel env. Never in a client bundle, never in git, never logged. Compared in constant time. |
-| Rotation | The site also accepts `INGEST_TOKEN_NEXT` if it's set. Set it on the site, switch ytfactory to it, then promote it and unset the old one. |
+| Auth | `Authorization: Bearer <token>` on every request. **One token per sender**: the token tells the site who is calling. |
+| Tokens | ytfactory → `INGEST_TOKEN`. mukulah-studio → `INGEST_TOKEN_STUDIO`. Each is random, ≥ 32 bytes (e.g. `openssl rand -base64 48`), and the same value lives only in that sender's env and the site's Vercel env. Never shared between senders, never in a client bundle, never in git, never logged. Compared in constant time. If one value is configured for two senders, the site refuses it (401). |
+| Rotation | The site also accepts `INGEST_TOKEN_NEXT` (ytfactory) and `INGEST_TOKEN_STUDIO_NEXT` (studio) if set. Set it on the site, switch the sender to it, then promote it and unset the old one. |
+| Ownership | A course belongs to the sender that created it (`course.source`). Only that sender can change the course or its lessons (`409 course_owned_by_other_sender`). Either sender can read any course (`GET`) and set a product's showcase video. |
+| Rate limit | 60 requests a minute **per sender**. |
 | Content type | `application/json` (except `/assets`, which is `multipart/form-data`) |
 | Body limit | JSON: 1 MB. Assets: 4 MB per file (Vercel caps function bodies at about 4.5 MB). When sending transcripts, split lessons across requests **by byte size** (keep each body under ~900 KB), not by a fixed count. |
 | Validation | zod, **strict**: unknown keys are rejected (400), so typos fail loudly instead of being silently dropped. |
@@ -122,7 +124,7 @@ Same Bearer token. Read-only. Returns unpublished lessons too (that's the point)
   "course": {
     "id": "uuid", "external_id": "squad-streaks", "slug": "squad-streaks",
     "title": "…", "access": "free", "product_slug": "squad-streaks", "playlist_id": null,
-    "thumbnail_url": null, "updated_at": "2026-11-19T10:00:00Z",
+    "source": "ytfactory", "thumbnail_url": null, "updated_at": "2026-11-19T10:00:00Z",
     "url": "https://romeomukulah.org/courses/squad-streaks"
   },
   "modules": [ { "external_id": "backend", "title": "…", "sort_order": 1 } ],
@@ -251,11 +253,12 @@ All errors look like this:
 | 401 | `unauthorized` | Missing or wrong token. Same response for both, no detail. |
 | 404 | `course_not_found` / `lesson_not_found` / `product_not_found` | The GET or PATCH target doesn't exist. |
 | 409 | `lesson_belongs_to_other_course` | `external_id` clash across courses. |
+| 409 | `course_owned_by_other_sender` | The course (or the lesson's course) was created by the other sender. |
 | 409 | `slug_taken` | The course `slug` is used by another course, or a new lesson's `slug` is used by another lesson in the same course. |
 | 413 | `payload_too_large` | Over 1 MB (JSON) or 4 MB (asset). |
 | 415 | `unsupported_media_type` | Wrong Content-Type, or an asset that isn't PNG/JPEG/WebP. |
 | 422 | `unknown_product` / `unknown_module` / `publish_requires_video_ref` | The request is well-formed but conflicts with what's in the DB. |
-| 429 | `rate_limited` | More than 60 requests a minute. Back off; the `Retry-After` header gives the seconds until the window resets. |
+| 429 | `rate_limited` | More than 60 requests a minute from your sender. Back off; the `Retry-After` header gives the seconds until the window resets. |
 | 500 | `internal_error` | Safe to retry. |
 
 ---
@@ -282,6 +285,13 @@ Not carried in v0.1, but can be added later without breaking anything: tags, pre
 ---
 
 ## 7. Changelog
+
+- **v0.2.1 (2026-11-20):** per-sender tokens, agreed with ytfactory and mukulah-studio. Additive: ytfactory's
+  existing `INGEST_TOKEN` keeps working unchanged.
+  - New token `INGEST_TOKEN_STUDIO` (+ `INGEST_TOKEN_STUDIO_NEXT` for rotation) for mukulah-studio.
+  - One sender per course: new `409 course_owned_by_other_sender`. Existing courses belong to ytfactory.
+  - `GET /courses/{external_id}` returns `course.source`.
+  - The rate limit (60/min) is counted per sender.
 
 - **v0.2 (2026-11-19):** implemented. Additive only, nothing changes for an existing sender:
   - New `409 slug_taken` (a slug clash previously had no defined error).
