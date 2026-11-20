@@ -60,8 +60,11 @@ export async function POST(request: NextRequest) {
       client_reference_id: user.id,
       metadata: { user_id: user.id, offer: offer.key },
       ...(offer.mode === 'subscription' ? { subscription_data: { metadata: { user_id: user.id, offer: offer.key } } } : {}),
-      ...(managedPayments() ? { managed_payments: { enabled: true } } : {}),
-      custom_text: { submit: { message: IMMEDIATE_ACCESS_NOTICE } },
+      // With Managed Payments, Stripe is the seller and shows its own consumer terms; it rejects
+      // custom_text. Without it (sandbox fallback), show our immediate-access notice ourselves.
+      ...(managedPayments()
+        ? { managed_payments: { enabled: true } }
+        : { custom_text: { submit: { message: IMMEDIATE_ACCESS_NOTICE } } }),
       success_url: `${site}/account/billing?checkout=success`,
       cancel_url: `${site}${returnTo}`,
     })

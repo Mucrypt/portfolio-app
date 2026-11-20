@@ -119,6 +119,7 @@ export default function ContactPage() {
     email: '',
     subject: '',
     message: '',
+    website: '', // honeypot: hidden from people
   })
   const [status, setStatus] = useState<
     'idle' | 'loading' | 'success' | 'error'
@@ -139,7 +140,7 @@ export default function ContactPage() {
 
       if (response.ok) {
         setStatus('success')
-        setFormData({ name: '', email: '', subject: '', message: '' })
+        setFormData({ name: '', email: '', subject: '', message: '', website: '' })
         setTimeout(() => setStatus('idle'), 5000)
       } else {
         const data = await response.json()
@@ -204,6 +205,19 @@ export default function ContactPage() {
                 </h2>
 
                 <form onSubmit={handleSubmit} className='space-y-6'>
+                  {/* Honeypot: invisible to people and screen readers; bots fill it in. */}
+                  <div aria-hidden='true' className='absolute -left-2499.75 h-0 w-0 overflow-hidden'>
+                    <label htmlFor='website'>Website</label>
+                    <input
+                      id='website'
+                      name='website'
+                      type='text'
+                      tabIndex={-1}
+                      autoComplete='off'
+                      value={formData.website}
+                      onChange={handleChange}
+                    />
+                  </div>
                   <div className='grid md:grid-cols-2 gap-6'>
                     <div>
                       <label

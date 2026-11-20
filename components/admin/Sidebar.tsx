@@ -27,6 +27,7 @@ import {
   Zap,
   Eye,
   Settings,
+  Mail,
 } from 'lucide-react'
 
 interface SidebarProps {
@@ -165,6 +166,12 @@ const menuSections = [
         href: '/admin/users',
         label: 'All Users',
         icon: Users,
+        badge: null,
+      },
+      {
+        href: '/admin/messages',
+        label: 'Messages',
+        icon: Mail,
         badge: null,
       },
       {
